@@ -1,0 +1,17 @@
+vendor
+node_modules
+npm-debug.log
+yarn-error.log
+.env
+storage/*.key
+storage/app/public
+storage/debugbar
+storage/framework/cache/data
+storage/logs
+storage/temp
+.git
+.gitignore
+docker-compose.override.yml
+.idea
+.vscode
+.DS_Store
