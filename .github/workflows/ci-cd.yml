@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: backend
-      APP_Key: ${{ secrets.APP_KEY }}
-
+      APP_KEY: ${{ secrets.APP_KEY}}
 
     steps:
       # 1. Checkout code
@@ -39,7 +38,7 @@ jobs:
       - name: Wait for services
         run: sleep 25
 
-     # 6. Install dependencies
+      # 6. Install dependencies
       - name: Install Laravel dependencies
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -48,4 +47,3 @@ jobs:
       - name: Run Laravel tests
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test php artisan test
-
