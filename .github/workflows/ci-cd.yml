@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: backend
+      APP_Key: ${{ secrets.APP_KEY }}
+
 
     steps:
       # 1. Checkout code
