@@ -37,15 +37,13 @@ jobs:
       - name: Wait for services
         run: sleep 25
 
-      # 6. Run Laravel tests
+     # 6. Install dependencies
+      - name: Install Laravel dependencies
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      # 7. Run Laravel tests
       - name: Run Laravel tests
         working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose exec laravel.test php artisan test
+        run: docker compose run --rm laravel.test php artisan test
 
-      # 7. Push Laravel image to Docker Hub (only if tests pass)
-      - name: Push Laravel image to Docker Hub
-        working-directory: ${{ env.BACKEND_DIR }}
-        run: |
-          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/laravel-app
-          docker tag sail-8.3/app $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:latest
