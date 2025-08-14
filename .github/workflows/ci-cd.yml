@@ -2,48 +2,79 @@ name: Laravel CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BACKEND_DIR: backend
+  COMPOSER_NO_INTERACTION: 1
 
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      BACKEND_DIR: backend
-      APP_KEY: ${{ secrets.APP_KEY}}
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: sami
+          POSTGRES_PASSWORD: sami
+          POSTGRES_DB: customer_satisfaction
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       # 1. Checkout code
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      # 2. Log in to Docker Hub
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      # 2. Setup PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          php-version: '8.3'
+          extensions: mbstring, ctype, fileinfo, openssl, PDO, tokenizer, xml, pgsql, pdo_pgsql
+          coverage: none
 
-      # 3. Build Docker containers
-      - name: Build Docker containers
+      # 3. Start Docker containers
+      - name: Start Docker services
         working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose build
+        run: |
+          docker compose up -d --build
+          docker compose run --rm laravel.test php artisan key:generate
+          docker compose run --rm laravel.test php artisan config:cache
 
-      # 4. Start Docker containers
-      - name: Start Docker containers
+      # 4. Wait for services (better than sleep)
+      - name: Wait for PostgreSQL
+        run: |
+          while ! nc -z localhost 5432; do
+            sleep 1
+          done
+
+      # 5. Database setup
+      - name: Run migrations and seed
         working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose up -d
-
-      # 5. Wait for DB and app to be ready
-      - name: Wait for services
-        run: sleep 25
+        run: |
+          docker compose run --rm laravel.test php artisan migrate:fresh --seed
+          docker compose run --rm laravel.test php artisan storage:link
 
       # 6. Install dependencies
-      - name: Install Laravel dependencies
+      - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist --optimize-autoloader
+        run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-      # 7. Run Laravel tests
-      - name: Run Laravel tests
+      # 7. Run tests
+      - name: Run tests
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test php artisan test
+
+      # 8. Push to Docker Hub (optional)
+      - name: Push to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker compose push

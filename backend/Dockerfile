@@ -1,4 +1,7 @@
-FROM php:8.3-fpm
+# -------------------------
+# Stage 1: Build PHP / Composer dependencies
+# -------------------------
+FROM php:8.3-fpm AS base
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -13,19 +16,36 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy composer files first (better caching)
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies without running artisan scripts
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+# -------------------------
+# Stage 2: Copy Application
+# -------------------------
+FROM base AS app
+
+# Copy application code
 COPY . .
 
-# Install Laravel dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Set permissions for Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Expose port (PHP-FPM listens on 9000)
+# Expose PHP-FPM port
 EXPOSE 9000
 
+# Run PHP-FPM
 CMD ["php-fpm"]
+
+# -------------------------
+# NOTES:
+# 1. We don't copy .env or run artisan commands here.
+# 2. After container starts, you should run:
+#      docker compose exec laravel.test cp .env.example .env
+#      docker compose exec laravel.test php artisan key:generate
+#      docker compose exec laravel.test php artisan migrate
+# -------------------------
