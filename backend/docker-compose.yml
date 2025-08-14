@@ -1,10 +1,13 @@
 version: '3.8'
 
 services:
+  # -------------------------
+  # Laravel App
+  # -------------------------
   laravel.test:
     build:
-      context: ./vendor/laravel/sail/runtimes/8.3
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile   # Use multi-stage Dockerfile
       args:
         WWWGROUP: '${WWWGROUP}'
     image: sail-8.3/app
@@ -18,7 +21,8 @@ services:
       LARAVEL_SAIL: 1
       XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
       XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
     volumes:
       - '.:/var/www/html'
     networks:
@@ -27,6 +31,9 @@ services:
       - pgsql
       - pgadmin
 
+  # -------------------------
+  # Nginx Reverse Proxy
+  # -------------------------
   nginx:
     image: nginx:stable-alpine
     ports:
@@ -39,6 +46,9 @@ services:
     networks:
       - sail
 
+  # -------------------------
+  # PostgreSQL Database
+  # -------------------------
   pgsql:
     image: 'postgres:latest'
     ports:
@@ -63,13 +73,16 @@ services:
       retries: 3
       timeout: 5s
 
+  # -------------------------
+  # pgAdmin GUI
+  # -------------------------
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@local.com
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "8090:80"  
+      - "8090:80"
     depends_on:
       - pgsql
     networks:

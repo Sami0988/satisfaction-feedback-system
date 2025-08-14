@@ -1,42 +1,46 @@
-name: Laravel CI/CD with Docker
+name: Laravel CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
 
 jobs:
-  build-and-test:
+  test-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # 2. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker Containers
-        run: docker-compose -f docker-compose.yml build
+      # 3. Build containers
+      - name: Build Docker containers
+        run: docker compose build
 
-      - name: Start Containers
-        run: docker-compose -f docker-compose.yml up -d
+      # 4. Start containers
+      - name: Start Docker containers
+        run: docker compose up -d
 
-      - name: Wait for PostgreSQL
-        run: |
-          echo "Waiting for PostgreSQL to be ready..."
-          until docker exec backend-pgsql-1 pg_isready -U ${{ secrets.DB_USERNAME }}; do
-            sleep 3
-          done
+      # 5. Wait for DB and app
+      - name: Wait for services
+        run: sleep 25
 
-      - name: Install dependencies & run migrations
-        run: |
-          docker exec backend-laravel.test-1 composer install
-          docker exec backend-laravel.test-1 php artisan migrate --force
-
+      # 6. Run Laravel tests
       - name: Run Laravel tests
-        run: docker exec backend-laravel.test-1 php artisan test
+        run: docker compose exec laravel.test php artisan test
 
-      - name: Stop Containers
-        run: docker-compose -f docker-compose.yml down
+      # 7. Push image to Docker Hub (only if tests pass)
+      - name: Push Laravel image to Docker Hub
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/laravel-app
+          docker tag sail-8.3/app $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
+    
