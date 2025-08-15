@@ -36,8 +36,7 @@ services:
       POSTGRES_DB: customer_satisfaction
       POSTGRES_USER: sami
       POSTGRES_PASSWORD: sami
-    ports:
-      - '5432:5432'
+    ports: []
     volumes:
       - 'sail-pgsql:/var/lib/postgresql/data'
     networks:

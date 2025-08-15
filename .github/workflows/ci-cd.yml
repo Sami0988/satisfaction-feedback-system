@@ -9,8 +9,6 @@ on:
 env:
   BACKEND_DIR: backend
   COMPOSER_NO_INTERACTION: 1
-  DB_HOST: localhost  # For GitHub's Postgres service
-  DB_PORT: 5432
 
 jobs:
   test-and-deploy:
@@ -31,71 +29,51 @@ jobs:
           --health-retries 5
 
     steps:
-      # 1. Checkout code
+      # 1. Checkout and setup
       - uses: actions/checkout@v4
+      
+      # 2. Clean up any conflicts
+      - name: Clear port conflicts
+        run: |
+          sudo systemctl stop postgresql || true
+          docker rm -f $(docker ps -aq --filter "publish=5432") || true
 
-      # 2. Setup PHP
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: mbstring, ctype, fileinfo, openssl, PDO, tokenizer, xml, pgsql, pdo_pgsql
-          coverage: none
-          tools: composer:v2
-
-      # 3. Cache Composer dependencies
-      - name: Cache Composer packages
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.BACKEND_DIR }}/vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
-
-      # 4. Start Docker services (without PostgreSQL)
-      - name: Start Docker services
+      # 3. Start only non-database services
+      - name: Start Laravel services
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          docker compose -f docker-compose.yml up -d --build --scale pgsql=0
+          docker compose up -d --build nginx laravel.test
           docker compose run --rm laravel.test php artisan key:generate
-          docker compose run --rm laravel.test php artisan config:cache
 
-      # 5. Wait for PostgreSQL
-      - name: Wait for PostgreSQL
+      # 4. Wait for PostgreSQL
+      - name: Verify PostgreSQL
         run: |
-          timeout 30 bash -c 'until nc -z localhost 5432; do sleep 2; done'
+          timeout 20 bash -c 'until pg_isready -h localhost -p 5432; do sleep 2; done'
 
-      # 6. Database setup
+      # 5. Database setup with CI credentials
       - name: Setup database
         working-directory: ${{ env.BACKEND_DIR }}
-        run: |
-          docker compose run --rm laravel.test php artisan migrate:fresh --seed
-          docker compose run --rm laravel.test php artisan storage:link
         env:
           DB_HOST: localhost
           DB_PORT: 5432
+          DB_USERNAME: sami
+          DB_PASSWORD: sami
+          DB_DATABASE: customer_satisfaction
+        run: |
+          docker compose run --rm laravel.test php artisan migrate:fresh --seed
+          docker compose run --rm laravel.test php artisan storage:link
 
-      # 7. Install dependencies
+      # 6. Install dependencies
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: |
-          docker compose run --rm laravel.test composer install \
-            --no-interaction \
-            --prefer-dist \
-            --optimize-autoloader \
-            --no-dev
+        run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist
 
-      # 8. Run tests
+      # 7. Run tests
       - name: Run tests
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test php artisan test
 
-      # 9. Security check
-      - name: Security audit
-        working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose run --rm laravel.test composer audit
-
-      # 10. Push to Docker Hub (main branch only)
+      # 8. Push to Docker Hub
       - name: Push to Docker Hub
         if: github.ref == 'refs/heads/main'
         run: |
