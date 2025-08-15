@@ -9,6 +9,8 @@ on:
 env:
   BACKEND_DIR: backend
   COMPOSER_NO_INTERACTION: 1
+  DB_HOST: localhost  # For GitHub's Postgres service
+  DB_PORT: 5432
 
 jobs:
   test-and-deploy:
@@ -39,40 +41,61 @@ jobs:
           php-version: '8.3'
           extensions: mbstring, ctype, fileinfo, openssl, PDO, tokenizer, xml, pgsql, pdo_pgsql
           coverage: none
+          tools: composer:v2
 
-      # 3. Start Docker containers
+      # 3. Cache Composer dependencies
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BACKEND_DIR }}/vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      # 4. Start Docker services (without PostgreSQL)
       - name: Start Docker services
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          docker compose up -d --build
+          docker compose -f docker-compose.yml up -d --build --scale pgsql=0
           docker compose run --rm laravel.test php artisan key:generate
           docker compose run --rm laravel.test php artisan config:cache
 
-      # 4. Wait for services (better than sleep)
+      # 5. Wait for PostgreSQL
       - name: Wait for PostgreSQL
         run: |
-          while ! nc -z localhost 5432; do
-            sleep 1
-          done
+          timeout 30 bash -c 'until nc -z localhost 5432; do sleep 2; done'
 
-      # 5. Database setup
-      - name: Run migrations and seed
+      # 6. Database setup
+      - name: Setup database
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
           docker compose run --rm laravel.test php artisan migrate:fresh --seed
           docker compose run --rm laravel.test php artisan storage:link
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
 
-      # 6. Install dependencies
+      # 7. Install dependencies
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+        run: |
+          docker compose run --rm laravel.test composer install \
+            --no-interaction \
+            --prefer-dist \
+            --optimize-autoloader \
+            --no-dev
 
-      # 7. Run tests
+      # 8. Run tests
       - name: Run tests
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test php artisan test
 
-      # 8. Push to Docker Hub 
+      # 9. Security check
+      - name: Security audit
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: docker compose run --rm laravel.test composer audit
+
+      # 10. Push to Docker Hub (main branch only)
       - name: Push to Docker Hub
         if: github.ref == 'refs/heads/main'
         run: |
