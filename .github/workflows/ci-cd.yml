@@ -68,6 +68,7 @@ jobs:
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist
 
+
       # 7. Run tests
       - name: Run tests
         working-directory: ${{ env.BACKEND_DIR }}
