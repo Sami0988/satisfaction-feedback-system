@@ -72,7 +72,7 @@ jobs:
         working-directory: ${{ env.BACKEND_DIR }}
         run: docker compose run --rm laravel.test php artisan test
 
-      # 8. Push to Docker Hub (optional)
+      # 8. Push to Docker Hub 
       - name: Push to Docker Hub
         if: github.ref == 'refs/heads/main'
         run: |
