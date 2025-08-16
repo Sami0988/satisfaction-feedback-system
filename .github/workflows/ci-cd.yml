@@ -72,7 +72,13 @@ jobs:
       # 7. Run tests
       - name: Run tests
         working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose run --rm laravel.test php artisan test
+        run: |
+           docker compose run --rm laravel.test composer install --no-interaction --prefer-dist
+           docker compose run --rm laravel.test chown -R www-data:www-data /var/www/html/vendor
+
+      - name: Verify autoloader
+        run: docker compose exec laravel.test test -f /var/www/html/vendor/autoload.php || exit 1
+
 
       # 8. Push to Docker Hub
       - name: Push to Docker Hub

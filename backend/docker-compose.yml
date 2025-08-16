@@ -13,6 +13,8 @@ services:
       APP_DEBUG: 'true'
     volumes:
       - '.:/var/www/html'
+      - /var/www/html/vendor 
+
     networks:
       - sail
     depends_on:
