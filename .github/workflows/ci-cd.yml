@@ -1,4 +1,4 @@
-name: Laravel CI/CD
+name: Laravel CI/CD Pipeline
 
 on:
   push:
@@ -6,53 +6,108 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  DB_HOST: 127.0.0.1
+  DB_PORT: 5432
+  DB_DATABASE: customer_satisfaction
+  DB_USERNAME: sami
+  DB_PASSWORD: sami
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/laravel-app  # Defined once here
+
 jobs:
-  laravel-tests:
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
     services:
       pgsql:
-        image: postgres:15-alpine
+        image: postgres:17-alpine
         env:
-          POSTGRES_DB: customer_satisfaction
-          POSTGRES_USER: sami
-          POSTGRES_PASSWORD: sami
+          POSTGRES_DB: ${{ env.DB_DATABASE }}
+          POSTGRES_USER: ${{ env.DB_USERNAME }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
         ports:
           - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.3'
-        extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd
-        coverage: none
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
 
-    - name: Install dependencies
-      run: |
-        composer install --no-interaction --prefer-dist --optimize-autoloader
-        cp .env.example .env
-        php artisan key:generate
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd
 
-    - name: Execute tests
-      run: php artisan test
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run tests
+        run: php artisan test
 
   deploy:
-    needs: laravel-tests
+    name: Deploy to Production
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    - name: Build and push
-      run: |
-        docker-compose -f docker-compose.prod.yml build --push
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Generate timestamp
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        working-directory: ./backend
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t ${{ env.DOCKER_IMAGE }}:latest \
+            -t ${{ env.DOCKER_IMAGE }}:${{ steps.timestamp.outputs.TIMESTAMP }} \
+            --push .
+
+      - name: Slack Notification
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Deployment ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Laravel App Deployment*\nStatus: ${{ job.status }}\nCommit: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
