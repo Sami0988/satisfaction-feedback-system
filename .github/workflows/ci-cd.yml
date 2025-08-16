@@ -45,12 +45,15 @@ jobs:
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd
+          coverage: none
 
       - name: Install dependencies
         run: |
@@ -59,7 +62,9 @@ jobs:
           php artisan key:generate
 
       - name: Run tests
-        run: php artisan test
+        run: |
+          php artisan config:clear
+          php artisan test
 
   deploy:
     name: Deploy to Production
@@ -83,14 +88,9 @@ jobs:
           registry: https://index.docker.io/v1/
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
+
+      - name: Prepare Docker cache
+        run: mkdir -p /tmp/.buildx-cache
 
       - name: Build and push
         working-directory: ./backend
