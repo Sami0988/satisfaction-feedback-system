@@ -1,29 +1,37 @@
-FROM php:8.3-fpm AS base
+FROM php:8.3-fpm
 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    git curl libpq-dev libzip-dev unzip zip \
-    && docker-php-ext-install pdo_pgsql zip bcmath
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libpq-dev
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
 WORKDIR /var/www/html
 
-# Step 1: Install deps without scripts
-COPY composer.json composer.lock ./
-RUN composer install --no-scripts --no-interaction --prefer-dist --optimize-autoloader
-
-FROM base AS app
-
-# Step 2: Copy application code
+# Copy existing application directory contents
 COPY . .
 
-# Step 3: Run scripts now that artisan exists
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Install dependencies
+RUN composer install --optimize-autoloader --no-interaction --no-progress
 
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 storage bootstrap/cache vendor
+# Permissions
+RUN chown -R www-data:www-data /var/www/html/storage
+RUN chmod -R 775 /var/www/html/storage
 
-HEALTHCHECK --interval=30s --timeout=3s \
-    CMD php -r "require '/var/www/html/vendor/autoload.php'; echo 'OK';" || exit 1
-
+EXPOSE 9000
 CMD ["php-fpm"]

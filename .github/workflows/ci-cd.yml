@@ -6,83 +6,53 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  BACKEND_DIR: backend
-  COMPOSER_NO_INTERACTION: 1
-
 jobs:
-  test-and-deploy:
+  laravel-tests:
     runs-on: ubuntu-latest
     services:
-      postgres:
-        image: postgres:latest
+      pgsql:
+        image: postgres:15-alpine
         env:
+          POSTGRES_DB: customer_satisfaction
           POSTGRES_USER: sami
           POSTGRES_PASSWORD: sami
-          POSTGRES_DB: customer_satisfaction
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      # 1. Checkout and setup
-      - uses: actions/checkout@v4
-      
-      # 2. Clean up any conflicts
-      - name: Clear port conflicts
-        run: |
-          sudo systemctl stop postgresql || true
-          docker rm -f $(docker ps -aq --filter "publish=5432") || true
+    - uses: actions/checkout@v4
 
-      # 3. Start only non-database services
-      - name: Start Laravel services
-        working-directory: ${{ env.BACKEND_DIR }}
-        run: |
-          docker compose up -d --build nginx laravel.test
-          docker compose run --rm laravel.test php artisan key:generate
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd
+        coverage: none
 
-      # 4. Wait for PostgreSQL
-      - name: Verify PostgreSQL
-        run: |
-          timeout 20 bash -c 'until pg_isready -h localhost -p 5432; do sleep 2; done'
+    - name: Install dependencies
+      run: |
+        composer install --no-interaction --prefer-dist --optimize-autoloader
+        cp .env.example .env
+        php artisan key:generate
 
-      # 5. Database setup with CI credentials
-      - name: Setup database
-        working-directory: ${{ env.BACKEND_DIR }}
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USERNAME: sami
-          DB_PASSWORD: sami
-          DB_DATABASE: customer_satisfaction
-        run: |
-          docker compose run --rm laravel.test php artisan migrate:fresh --seed
-          docker compose run --rm laravel.test php artisan storage:link
+    - name: Execute tests
+      run: php artisan test
 
-      # 6. Install dependencies
-      - name: Install dependencies
-        working-directory: ${{ env.BACKEND_DIR }}
-        run: docker compose run --rm laravel.test composer install --no-interaction --prefer-dist
-
-
-      # 7. Run tests
-      - name: Run tests
-        working-directory: ${{ env.BACKEND_DIR }}
-        run: |
-           docker compose run --rm laravel.test composer install --no-interaction --prefer-dist
-           docker compose run --rm laravel.test chown -R www-data:www-data /var/www/html/vendor
-
-      - name: Verify autoloader
-        run: docker compose exec laravel.test test -f /var/www/html/vendor/autoload.php || exit 1
-
-
-      # 8. Push to Docker Hub
-      - name: Push to Docker Hub
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker compose push
+  deploy:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Build and push
+      run: |
+        docker-compose -f docker-compose.prod.yml build --push

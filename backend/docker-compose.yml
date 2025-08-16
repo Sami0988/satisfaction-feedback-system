@@ -1,3 +1,4 @@
+version: '3.8'
 
 services:
   laravel.test:
@@ -6,15 +7,17 @@ services:
       dockerfile: Dockerfile
     image: sail-8.3/app
     environment:
-      WWWUSER: 1000
-      WWWGROUP: 1000
-      LARAVEL_SAIL: 1
-      APP_ENV: local
-      APP_DEBUG: 'true'
+      WWWUSER: ${WWWUSER:-1000}
+      WWWGROUP: ${WWWGROUP:-1000}
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      DB_HOST: pgsql
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-customer_satisfaction}
+      DB_USERNAME: ${DB_USERNAME:-sami}
+      DB_PASSWORD: ${DB_PASSWORD:-sami}
     volumes:
       - '.:/var/www/html'
-      - /var/www/html/vendor 
-
     networks:
       - sail
     depends_on:
@@ -23,7 +26,7 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      - '8080:80'
+      - '${APP_PORT:-8080}:80'
     volumes:
       - '.:/var/www/html:ro'
       - './nginx/default.conf:/etc/nginx/conf.d/default.conf:ro'
@@ -33,29 +36,33 @@ services:
       - sail
 
   pgsql:
-    image: postgres:latest
+    image: postgres:17
     environment:
-      POSTGRES_DB: customer_satisfaction
-      POSTGRES_USER: sami
-      POSTGRES_PASSWORD: sami
-    ports: []
+      POSTGRES_DB: ${DB_DATABASE:-customer_satisfaction}
+      POSTGRES_USER: ${DB_USERNAME:-sami}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sami}
     volumes:
       - 'sail-pgsql:/var/lib/postgresql/data'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-sami}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - sail
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "8090:80"
-    depends_on:
-      - pgsql
-    networks:
-      - sail
-
+pgadmin:
+  image: dpage/pgadmin4:latest
+  environment:
+    PGADMIN_DEFAULT_EMAIL: admin@example.com
+    PGADMIN_DEFAULT_PASSWORD: admin
+    PGADMIN_CONFIG_SERVER_MODE: False  # Disable server mode
+    PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: False  # Skip master password
+  ports:
+    - "8090:80"
+  volumes:
+    - pgadmin-data:/var/lib/pgadmin
+  restart: unless-stopped  # Auto-recover if crashes
 networks:
   sail:
     driver: bridge
@@ -63,4 +70,5 @@ networks:
 volumes:
   sail-pgsql:
     driver: local
-
+  pgadmin-data:
+    driver: local
