@@ -15,3 +15,6 @@ docker-compose.override.yml
 .idea
 .vscode
 .DS_Store
+*.log
+Dockerfile
+docker-compose*
