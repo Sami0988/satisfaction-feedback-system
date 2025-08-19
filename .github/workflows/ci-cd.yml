@@ -61,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ccomposer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+          composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
           cp .env.example .env
           php artisan key:generate
 
