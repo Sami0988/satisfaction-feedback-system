@@ -24,12 +24,23 @@ WORKDIR /var/www/html
 # Copy composer files first for better cache
 COPY composer.json composer.lock ./
 
-# Clean up and install dependencies
-RUN rm -rf vendor
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# Copy .env.example temporarily to avoid config errors
+COPY .env.example .env
+
+# Install dependencies without running post-install scripts
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
+
+# Run the scripts manually after all files are copied
+
+RUN composer run-script post-autoload-dump
+
 
 # Copy rest of the app
 COPY . .
+
+# Generate application key and clear config (now that all files are copied)
+RUN php artisan key:generate --force
+RUN php artisan config:clear
 
 # Set permissions for storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \

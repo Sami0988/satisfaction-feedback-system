@@ -61,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader
+          ccomposer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
           cp .env.example .env
           php artisan key:generate
 
@@ -103,6 +103,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Build and push Docker image
         working-directory: ./backend
         run: |
@@ -110,23 +111,13 @@ jobs:
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/laravel-app
 
-          # Create cache directory if it doesn't exist
-          mkdir -p /tmp/.buildx-cache
-
-          # Build and push
+          # Build without cache first to ensure it works
           docker buildx build \
             --platform linux/amd64 \
             --build-arg APP_ENV=$APP_ENV \
             --build-arg APP_DEBUG=$APP_DEBUG \
             --build-arg SWAGGER_ENABLE=$SWAGGER_ENABLE \
             --build-arg L5_SWAGGER_GENERATE_ALWAYS=$L5_SWAGGER_GENERATE_ALWAYS \
-            --cache-from type=local,src=/tmp/.buildx-cache \
-            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             -t $IMAGE_NAME:latest \
             -t $IMAGE_NAME:${{ github.sha }} \
             --push .
-
-          # Update cache
-          rm -rf /tmp/.buildx-cache
-          mkdir -p /tmp/.buildx-cache
-          cp -r /tmp/.buildx-cache-new/* /tmp/.buildx-cache/ || true
