@@ -104,6 +104,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
 
+      - name: Install dependencies
+        run: |
+           composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+           cp .env.example .env
+           artisan key:generate --force
+
       - name: Build and push Docker image
         working-directory: ./backend
         run: |
@@ -121,3 +127,4 @@ jobs:
             -t $IMAGE_NAME:latest \
             -t $IMAGE_NAME:${{ github.sha }} \
             --push .
+

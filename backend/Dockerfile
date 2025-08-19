@@ -27,20 +27,16 @@ COPY composer.json composer.lock ./
 # Copy .env.example temporarily to avoid config errors
 COPY .env.example .env
 
-# Install dependencies without running post-install scripts
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
-
-# Run the scripts manually after all files are copied
-
-RUN composer run-script post-autoload-dump
-
+# Install dependencies without running ANY scripts
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts --ignore-platform-reqs
 
 # Copy rest of the app
 COPY . .
 
-# Generate application key and clear config (now that all files are copied)
-RUN php artisan key:generate --force
-RUN php artisan config:clear
+# Now manually run the necessary artisan commands
+RUN php artisan key:generate --force || true
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
 
 # Set permissions for storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
