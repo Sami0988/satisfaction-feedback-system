@@ -2,16 +2,16 @@ name: Laravel CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   DB_HOST: 127.0.0.1
   DB_PORT: 5432
   DB_DATABASE: customer_satisfaction
-  DB_USERNAME: sami
-  DB_PASSWORD: sami
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 # Required for GHCR access
 permissions:
@@ -55,7 +55,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
           extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd
           coverage: none
 
@@ -75,7 +75,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -99,7 +99,7 @@ jobs:
           # Use lowercase repository owner name
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/laravel-app
-          
+
           docker buildx build \
             --platform linux/amd64 \
             --cache-from type=local,src=/tmp/.buildx-cache \
@@ -107,7 +107,7 @@ jobs:
             -t $IMAGE_NAME:latest \
             -t $IMAGE_NAME:${{ github.sha }} \
             --push .
-          
+
           # Update cache
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
