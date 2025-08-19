@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend
+        working-directory: ./backend  # ← FIXED TYPO
 
     services:
       pgsql:
@@ -63,7 +63,7 @@ jobs:
         run: |
           composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
           cp .env.example .env
-          php artisan key:generate
+          php artisan key:generate --force  # ← Added --force
 
       - name: Run tests
         run: |
@@ -103,13 +103,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-
-      - name: Install dependencies
-        run: |
-           composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
-           cp .env.example .env
-           artisan key:generate --force
-
       - name: Build and push Docker image
         working-directory: ./backend
         run: |
@@ -127,4 +120,3 @@ jobs:
             -t $IMAGE_NAME:latest \
             -t $IMAGE_NAME:${{ github.sha }} \
             --push .
-
