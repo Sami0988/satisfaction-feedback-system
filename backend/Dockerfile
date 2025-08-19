@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
-RUN docker-php-ext-enable pdo_pgsql  # Enable PostgreSQL extension
+RUN docker-php-ext-enable pdo_pgsql
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -24,9 +24,9 @@ WORKDIR /var/www/html
 # Copy composer files first for better cache
 COPY composer.json composer.lock ./
 
-# Install dependencies (only production) - with better error handling
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist \
-    --ignore-platform-reqs || composer install --no-dev --optimize-autoloader --no-interaction
+# Clean up and install dependencies
+RUN rm -rf vendor
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Copy rest of the app
 COPY . .
@@ -35,7 +35,7 @@ COPY . .
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Generate Swagger docs (make it non-blocking)
+# Generate Swagger docs (non-blocking)
 RUN php artisan l5-swagger:generate || echo "Swagger generation failed - continuing"
 
 EXPOSE 9000
