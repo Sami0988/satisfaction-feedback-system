@@ -75,6 +75,16 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    env:
+      APP_ENV: production
+      APP_DEBUG: false
+      SWAGGER_ENABLE: ${{ secrets.SWAGGER_ENABLE }}
+      L5_SWAGGER_GENERATE_ALWAYS: ${{ secrets.L5_SWAGGER_GENERATE_ALWAYS }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: customer_satisfaction
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -93,15 +103,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push Docker image
         working-directory: ./backend
         run: |
-          # Use lowercase repository owner name
+          # Repository info
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/laravel-app
 
+          # Build and push
           docker buildx build \
             --platform linux/amd64 \
+            --build-arg APP_ENV=$APP_ENV \
+            --build-arg APP_DEBUG=$APP_DEBUG \
+            --build-arg SWAGGER_ENABLE=$SWAGGER_ENABLE \
+            --build-arg L5_SWAGGER_GENERATE_ALWAYS=$L5_SWAGGER_GENERATE_ALWAYS \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new \
             -t $IMAGE_NAME:latest \
