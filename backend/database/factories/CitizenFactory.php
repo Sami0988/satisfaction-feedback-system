@@ -21,7 +21,7 @@ class CitizenFactory extends Factory
             'id' => $this->faker->uuid(),
             'first_name' => $this->faker->firstName(),
             'phone' => $this->faker->unique()->phoneNumber(),
-            'password' => Hash::make('password'), // default password
+            'password' => Hash::make('password'), 
             'is_anonymous' => $this->faker->boolean(10),
         ];
     }

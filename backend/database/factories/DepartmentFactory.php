@@ -21,7 +21,7 @@ class DepartmentFactory extends Factory
             'name' => $this->faker->company(),
             'code' => strtoupper($this->faker->lexify('DEPT???')),
             'description' => $this->faker->sentence(),
-            'parent_id' => null,
+
 
         ];
     }

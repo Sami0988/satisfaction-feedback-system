@@ -9,13 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('citizens', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+   public function up(): void
+{
+    Schema::create('citizens', function (Blueprint $table) {
+        $table->uuid('id')->primary();
+        $table->string('first_name');
+        $table->string('phone')->unique();
+        $table->string('password');
+        $table->boolean('is_anonymous')->default(false);
+
+        $table->timestamps();
+    });
+}
+
 
     /**
      * Reverse the migrations.
