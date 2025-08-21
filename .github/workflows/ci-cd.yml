@@ -55,8 +55,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd, xdebug
-          coverage: none
+          extensions: pdo, pdo_pgsql, mbstring, exif, pcntl, gd
+          coverage: pcov
+
 
       - name: Install dependencies
         run: |
