@@ -35,7 +35,7 @@ class Role extends Model
             'user_id',
             'role_id',
             'user_id'
-        );
+        )->using(UserRole::class);
     }
 
     public function userRoles(): HasMany
