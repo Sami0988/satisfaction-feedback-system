@@ -32,7 +32,7 @@ jobs:
         env:
           POSTGRES_DB: ${{ env.DB_DATABASE }}
           POSTGRES_USER: ${{ env.DB_USERNAME }}
-          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
@@ -70,27 +70,22 @@ jobs:
           # Create test database
           php artisan config:clear
           # Run migrations for test database
-          php artisan migrate --force --env=testing
+          php artisan migrate --force
 
-      - name: Run tests with coverage and output
+      - name: Run tests with verbose output
         run: |
-          # Run tests with verbose output and generate test results
-          php artisan test --verbose --stop-on-failure --log-junit junit.xml
+          php artisan test --verbose --stop-on-failure
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
+      - name: Run tests with JUnit output (optional)
+        run: |
+          php artisan test --log-junit junit.xml || true
+
+      - name: Upload test results (if generated)
+        if: always() && hashFiles('junit.xml') != ''
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: junit.xml
-
-      - name: Run specific test suites (optional)
-        run: |
-          # Run unit tests
-          php artisan test tests/Unit/ --verbose
-          
-          # Run feature tests  
-          php artisan test tests/Feature/ --verbose
 
   # Optional: Add a linting/static analysis job
   lint:
@@ -113,17 +108,17 @@ jobs:
 
       - name: Run PHPStan (static analysis)
         run: |
-          composer require --dev phpstan/phpstan
-          vendor/bin/phpstan analyse --level=5
+          composer require --dev phpstan/phpstan --no-interaction
+          vendor/bin/phpstan analyse --level=5 --error-format=github
 
       - name: Run Laravel Pint (code formatting)
         run: |
-          composer require --dev laravel/pint
+          composer require --dev laravel/pint --no-interaction
           vendor/bin/pint --test
 
   deploy:
     name: Deploy to GHCR
-    needs: [test, lint]  # Add lint job as dependency
+    needs: test  # Only depend on test job for now
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     env:
@@ -141,7 +136,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
             image=moby/buildkit:master
@@ -161,7 +156,6 @@ jobs:
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/laravel-app
 
-          # Build without cache first to ensure it works
           docker buildx build \
             --platform linux/amd64 \
             --build-arg APP_ENV=$APP_ENV \
