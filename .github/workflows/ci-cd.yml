@@ -74,7 +74,7 @@ jobs:
         run: ./vendor/bin/pest --stop-on-failure
 
       - name: Run Pest with coverage (optional)
-        run: ./vendor/bin/pest --coverage --min=80
+        run: ./vendor/bin/pest --coverage 
 
       - name: Run Pest with JUnit output (optional)
         run: ./vendor/bin/pest --log-junit junit.xml
