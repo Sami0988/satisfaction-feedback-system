@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Department>
@@ -17,12 +18,12 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => $this->faker->uuid(),
-            'name' => $this->faker->company(),
-            'code' => strtoupper($this->faker->lexify('DEPT???')),
-            'description' => $this->faker->sentence(),
-
-
+            'department_id'=> Str::uuid(),
+            'name'=>$this->faker->company,
+            'code' => 'DEP-' . \Illuminate\Support\Str::uuid(),
+            'type'=>$this->faker->randomElement(['HR','Finance','IT','Dirctorate','Law','unit']),
+            'email'=>$this->faker->optional(0.7)->companyEmail,
+            'phone'=>$this->faker->optional(0.7)->phoneNumber,
         ];
     }
 }

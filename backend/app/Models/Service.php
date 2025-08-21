@@ -7,39 +7,44 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class FeedbackForm extends Model
+class Service extends Model
 {
     use HasFactory;
 
-    protected $table = 'feedback_forms';
-    protected $primaryKey = 'form_id';
+    protected $table = 'services';
+    protected $primaryKey = 'service_id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'form_id',
         'service_id',
+        'department_id',
         'name',
+        'category',
         'description',
-        'language',
         'active',
     ];
 
     protected $casts = [
-        'form_id' => 'string',
         'service_id' => 'string',
+        'department_id' => 'string',
         'active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    public function service(): BelongsTo
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(Service::class, 'service_id', 'service_id');
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
-    public function questions(): HasMany
+    public function feedbackForms(): HasMany
     {
-        return $this->hasMany(FeedbackQuestion::class, 'form_id', 'form_id');
+        return $this->hasMany(FeedbackForm::class, 'service_id', 'service_id');
+    }
+
+    public function feedbackResponses(): HasMany
+    {
+        return $this->hasMany(FeedbackResponse::class, 'service_id', 'service_id');
     }
 }

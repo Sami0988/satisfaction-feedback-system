@@ -4,25 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Department extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'id', 'name', 'code', 'description', 'parent_id'
-    ];
-
-    public $incrementing = false;   // since id is String/UUID
+    protected $table = 'departments';
+    protected $primaryKey = 'department_id';
+    public $incrementing = false;
     protected $keyType = 'string';
 
-    public function employees()
-    {
-        return $this->hasMany(EmployeeDepartment::class);
-    }
+    protected $fillable = [
+        'department_id',
+        'name',
+        'code',
+        'type',
+        'email',
+        'phone',
+    ];
 
-    public function forms()
+    protected $casts = [
+        'department_id' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    public function services(): HasMany
     {
-        return $this->hasMany(FeedbackForm::class);
+        return $this->hasMany(Service::class, 'department_id', 'department_id');
     }
 }

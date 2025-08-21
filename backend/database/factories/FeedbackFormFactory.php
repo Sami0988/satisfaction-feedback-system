@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FeedbackForm>
@@ -17,12 +18,15 @@ class FeedbackFormFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => $this->faker->uuid(),
-            'department_id' => \App\Models\Department::inRandomOrder()->first()->id ?? \App\Models\Department::factory(),
-            'name' => $this->faker->catchPhrase(),
-            'description' => $this->faker->sentence(),
-            'language' => 'en',
-            'is_active' => $this->faker->boolean(80),
+            'form_id' => Str::uuid(),
+            'service_id' => \App\Models\Service::factory(),
+            'name' => $this->faker->word(3, true) . ' Feedback Form',
+            
+           
+            'description' => $this->faker->paragraph(),
+            'language' => $this->faker->randomElement(['en', 'am']),
+            'active' => $this->faker->boolean(90),
+           
         ];
     }
 }
