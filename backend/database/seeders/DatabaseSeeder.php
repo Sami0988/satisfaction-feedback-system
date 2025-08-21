@@ -31,9 +31,9 @@ class DatabaseSeeder extends Seeder
             \App\Models\UserRole::factory()->create([
                 'user_id' => $user->user_id,
                 'role_id' => $role->role_id
-            ]);
-        }
-    });
+                ]);
+            }
+        });
 
         
         // Create feedback forms for services
