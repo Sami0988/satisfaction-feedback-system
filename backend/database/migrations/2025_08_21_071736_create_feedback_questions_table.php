@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('feedback_questions', function (Blueprint $table) {
-            $table->id();
              $table->uuid('question_id')->primary();
             $table->uuid('form_id');
             $table->text('question_text');

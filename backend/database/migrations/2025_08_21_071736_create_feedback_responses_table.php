@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('feedback_responses', function (Blueprint $table) {
-            $table->id();
              $table->uuid('response_id')->primary();
             $table->uuid('user_id');
             $table->uuid('question_id');
