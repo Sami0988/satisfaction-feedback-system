@@ -46,4 +46,6 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 RUN php artisan l5-swagger:generate || echo "Swagger generation failed - continuing"
 
 EXPOSE 9000
+
+# Use the default command to run PHP-FPM
 CMD ["php-fpm"]
