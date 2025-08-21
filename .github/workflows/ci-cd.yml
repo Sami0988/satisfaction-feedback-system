@@ -109,8 +109,7 @@ jobs:
       - name: Run PHPStan (static analysis)
         run: |
           composer require --dev phpstan/phpstan --no-interaction
-          vendor/bin/phpstan analyse --level=5 --error-format=github
-
+          vendor/bin/phpstan analyse app --level=5 --error-format=github
       - name: Run Laravel Pint (code formatting)
         run: |
           composer require --dev laravel/pint --no-interaction
