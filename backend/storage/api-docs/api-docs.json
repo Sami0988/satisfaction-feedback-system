@@ -9,30 +9,6 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/employees": {
-            "get": {
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Get list of employees",
-                "operationId": "7fc06f144c1cd7925c5c391a6609f02d",
-                "responses": {
-                    "200": {
-                        "description": "List of employees",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Employee"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/users": {
             "get": {
                 "tags": [
@@ -48,59 +24,7 @@
             }
         }
     },
-    "components": {
-        "schemas": {
-            "Employee": {
-                "title": "Employee",
-                "required": [
-                    "id",
-                    "first_name",
-                    "last_name"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "example": "emp_123"
-                    },
-                    "first_name": {
-                        "type": "string",
-                        "example": "John"
-                    },
-                    "last_name": {
-                        "type": "string",
-                        "example": "Doe"
-                    },
-                    "position": {
-                        "type": "string",
-                        "example": "Manager"
-                    },
-                    "hire_date": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "2023-05-12"
-                    },
-                    "barcode": {
-                        "type": "string",
-                        "example": "123456789"
-                    },
-                    "employee_id": {
-                        "type": "string",
-                        "example": "E-001"
-                    },
-                    "is_active": {
-                        "type": "boolean",
-                        "example": true
-                    }
-                },
-                "type": "object"
-            }
-        }
-    },
     "tags": [
-        {
-            "name": "Employees",
-            "description": "Employees"
-        },
         {
             "name": "Users",
             "description": "Users"
