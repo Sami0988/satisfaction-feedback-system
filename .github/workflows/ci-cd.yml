@@ -13,7 +13,6 @@ env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
-# Required for GHCR access
 permissions:
   contents: read
   packages: write
@@ -24,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend  # ← FIXED TYPO
+        working-directory: ./backend
 
     services:
       pgsql:
@@ -32,7 +31,7 @@ jobs:
         env:
           POSTGRES_DB: ${{ env.DB_DATABASE }}
           POSTGRES_USER: ${{ env.DB_USERNAME }}
-          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -45,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
@@ -63,19 +62,21 @@ jobs:
         run: |
           composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
           cp .env.example .env
-          php artisan key:generate --force  # ← Added --force
-
+          php artisan key:generate --force
 
       - name: Setup test environment
         run: |
           php artisan config:clear
           php artisan migrate --force
 
-      - name: Run Pest tests (verbose)
-        run: ./vendor/bin/pest --verbose --stop-on-failure
+      - name: Run Pest tests
+        run: ./vendor/bin/pest --stop-on-failure
 
-      - name: Run Pest with JUnit output
-        run: ./vendor/bin/pest --log-junit junit.xml || true
+      - name: Run Pest with coverage (optional)
+        run: ./vendor/bin/pest --coverage --min=80
+
+      - name: Run Pest with JUnit output (optional)
+        run: ./vendor/bin/pest --log-junit junit.xml
 
       - name: Upload test results
         if: always() && hashFiles('junit.xml') != ''
@@ -83,11 +84,6 @@ jobs:
         with:
           name: pest-test-results
           path: junit.xml
-
-      - name: Run tests
-        run: |
-          php artisan config:clear
-          php artisan test
 
   deploy:
     name: Deploy to GHCR
@@ -109,7 +105,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
             image=moby/buildkit:master
@@ -125,11 +121,9 @@ jobs:
       - name: Build and push Docker image
         working-directory: ./backend
         run: |
-          # Repository info
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/laravel-app
 
-          # Build without cache first to ensure it works
           docker buildx build \
             --platform linux/amd64 \
             --build-arg APP_ENV=$APP_ENV \
