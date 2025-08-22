@@ -54,8 +54,8 @@ services:
     pgadmin:
         image: dpage/pgadmin4:8.5 
         environment:
-            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+            PGADMIN_DEFAULT_EMAIL: sami@gmail.com
+            PGADMIN_DEFAULT_PASSWORD: sami
         ports:
             - "8090:80"
         volumes:
