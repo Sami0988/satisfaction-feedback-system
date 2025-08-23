@@ -5,6 +5,7 @@ function App() {
       <button className="text-3xl bg-red-200 rounded-lg ml-3 p-4">
         Click Me
       </button>
+      <p>This is Test from the developer</p>
     </div>
   );
 }
