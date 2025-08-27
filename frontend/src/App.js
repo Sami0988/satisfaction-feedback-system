@@ -1,12 +1,21 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import WelcomePage from "./pages/Service_Selection/WelcomePage";
+import DepartmentPage from "./pages/Service_Selection/DepartmentPage";
+import ServicePage from "./pages/Service_Selection/ServicePage";
+import EmployeePage from "./pages/Service_Selection/EmployeePage";
+
+
 function App() {
   return (
-    <div className="h-screen flex items-center justify-center bg-blue-100">
-      <h1 className="text-4xl font-bold text-blue-800">Hello Tailwind</h1>
-      <button className="text-3xl bg-red-200 rounded-lg ml-3 p-4">
-        Click Me
-      </button>
-      <p>This is Test from the developer</p>
-    </div>
+    /* Define routes for the application */
+    <Router>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/department" element={<DepartmentPage />} />
+        <Route path="/service" element={<ServicePage />} />
+        <Route path="/employee" element={<EmployeePage />} />    
+      </Routes>
+    </Router>
   );
 }
 

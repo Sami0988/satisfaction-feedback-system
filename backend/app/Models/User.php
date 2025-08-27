@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable; // 👈 change from Model
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Model
+class User extends Authenticatable
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'app_users';
     protected $primaryKey = 'user_id';
@@ -24,6 +26,11 @@ class User extends Model
         'user_type',
         'national_id',
         'active',
+        'password',   // ✅ must be fillable
+    ];
+
+    protected $hidden = [
+        'password',   // ✅ hide password in responses
     ];
 
     protected $casts = [
