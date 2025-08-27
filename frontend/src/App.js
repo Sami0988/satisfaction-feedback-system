@@ -5,7 +5,7 @@ function App() {
   const [satisfactionData] = useState({
     overallScore: 4.5,
     responses: 1284,
-    trend: 'up', // up, down, or stable
+    trend: 'up',
     metrics: {
       responsiveness: 4.7,
       quality: 4.3,
