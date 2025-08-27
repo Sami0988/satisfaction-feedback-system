@@ -18,13 +18,13 @@ jobs:
       # Checkout the code
       - uses: actions/checkout@v4
 
-      # Setup Node.js
+      # Setup Node.js with proper cache configuration
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: ./frontend/package-lock.json  # Fixed path
 
       # Install dependencies
       - name: Install dependencies
@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: react-build
-          path: ./build
+          path: ./frontend/build  # Fixed path
 
   deploy:
     name: Build & Push Docker Image
