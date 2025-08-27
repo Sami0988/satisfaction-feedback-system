@@ -6,4 +6,4 @@ const DepartmentPage = () => {
   )
 }
 
-export default DepartmentPage
+export default DepartmentPage      
