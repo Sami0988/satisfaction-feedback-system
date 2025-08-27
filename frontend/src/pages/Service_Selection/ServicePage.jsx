@@ -1,4 +1,4 @@
-import React from 'react'
+import React ,{memo}from 'react'
 
 const ServicePage = () => {
   return (
@@ -6,4 +6,4 @@ const ServicePage = () => {
   )
 }
 
-export default ServicePage
+export default ServicePage;
