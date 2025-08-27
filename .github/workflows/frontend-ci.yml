@@ -15,28 +15,34 @@ jobs:
         working-directory: ./frontend
 
     steps:
+      # Checkout the code
       - uses: actions/checkout@v4
 
+      # Setup Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: package-lock.json  # relative to working-directory
+          cache-dependency-path: package-lock.json
 
+      # Install dependencies
       - name: Install dependencies
         run: npm ci
 
+      # Lint step (optional)
       - name: Run Lint
         run: npm run lint --if-present
 
+      # Run Jest tests
       - name: Run Jest Tests
         run: npm test -- --watchAll=false --ci --coverage
-        # this will fail the pipeline if tests fail
 
+      # Build production bundle
       - name: Build
         run: npm run build
 
+      # Upload build artifact
       - name: Upload production-ready build
         uses: actions/upload-artifact@v4
         with:
@@ -50,11 +56,14 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
+      # Checkout code
       - uses: actions/checkout@v4
 
+      # Setup Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Login to GitHub Container Registry
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -62,6 +71,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Build and push Docker image
       - name: Build and push Docker image
         working-directory: ./frontend
         run: |
