@@ -7,6 +7,7 @@ import EmployeePage from "./pages/Service_Selection/EmployeePage";
 
 function App() {
   return (
+    /* Define routes for the application */
     <Router>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
