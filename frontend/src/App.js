@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { DarkModeProvider } from "./contexts/DarkModeContext";
+import { DarkModeProvider } from "./context/DarkModeContext";
 import Layout from "./components/Layout";
 
 // lazy imports
