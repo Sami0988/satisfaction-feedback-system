@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import departmentServices from './Data/service';
-import { useDarkMode } from "../../context/DarkModeContext";
 
 function ServicesPage() {
   // Sample data grouped by department
