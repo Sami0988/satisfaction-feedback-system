@@ -3,21 +3,24 @@ import { useNavigate } from "react-router-dom";
 
 const DepartmentCard = ({ dept, index, hoveredCard, setHoveredCard }) => {
   const navigate = useNavigate();
-  const handleclick = () => {
+
+  const handleClick = () => {
     navigate(`/service`);
   };
+
   return (
     <div
-      onClick={handleclick}
+      onClick={handleClick}
       onMouseEnter={() => setHoveredCard(index)}
       onMouseLeave={() => setHoveredCard(null)}
-      className="cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 dark:from-gray-600 dark:to-gray-700 text-white shadow-xl rounded-2xl p-6 
+      className={`cursor-pointer shadow-xl rounded-2xl p-6 
       transition-all duration-300 transform hover:scale-105 
-      hover:shadow-2xl relative overflow-hidden"
+      hover:shadow-2xl relative overflow-hidden
+      bg-white text-black dark:from-gray-800 dark:to-gray-900 dark:bg-gradient-to-r dark:text-white`}
     >
       {/* Animated background element */}
       <div
-        className={`absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white opacity-10 ${
+        className={`absolute -top-4 -right-4 w-20 h-20 rounded-full bg-black dark:bg-white opacity-10 ${
           hoveredCard === index ? "scale-150" : "scale-100"
         } transition-transform duration-300`}
       ></div>
