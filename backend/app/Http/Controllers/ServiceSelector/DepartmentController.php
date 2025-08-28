@@ -20,7 +20,7 @@ class DepartmentController extends Controller
     // List all departments
 public function index()
     {
-        $departments = Department::orderBy('created_at', 'desc')->paginate(15);
+        $departments = Department::orderBy('created_at', 'desc')->paginate(6);
         return view('departments.index', compact('departments'));
     }
 
