@@ -54,7 +54,7 @@ const WelcomePage=()=> {
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if (error) setError(false); // Clear error on change
+                if (error) setError(false); 
               }}
               placeholder="Enter your name"
               className={`w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition ${
