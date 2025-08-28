@@ -45,6 +45,7 @@ class UserTest extends TestCase
             'user_type',
             'national_id',
             'active',
+            'password',
         ];
         $this->assertEquals($expectedFillable, $user->getFillable());
     }
