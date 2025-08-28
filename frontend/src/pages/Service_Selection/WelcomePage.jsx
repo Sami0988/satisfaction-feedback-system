@@ -13,6 +13,9 @@ const handleSubmit = (e) => {
     setError(true);
     return;
   }
+  else{
+    window.alert(error);
+  }
 
   setError(false);
   setSubmittedName(name.trim());
