@@ -7,21 +7,52 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+
 /**
- * @OA\Tag(
- *     name="Departments",
- *     description="Operations about departments"
+ * @OA\Schema(
+ *     schema="Department",
+ *     type="object",
+ *     title="Department",
+ *     required={"id","name","code","email","phone"},
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="Finance"),
+ *     @OA\Property(property="code", type="string", example="FIN"),
+ *     @OA\Property(property="email", type="string", example="finance@company.com"),
+ *     @OA\Property(property="phone", type="string", example="+251912345678"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
  * )
  */
 
+
+
 class DepartmentController extends Controller
 {
-    // List all departments
-    public function index()
-    {
-        $departments = Department::orderBy('created_at', 'desc')->paginate(15);
-        return view('departments.index', compact('departments'));
-    }
+/**
+     * @OA\Get(
+     *     path="/api/departments",
+     *     tags={"Departments"},
+     *     summary="Get a list of all departments",
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of departments",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Department")
+     *         )
+     *     )
+     * )
+     */
+
+    public function apiIndex()
+{
+    $departments = Department::orderBy('created_at', 'desc')->get();
+    return response()->json($departments);
+}
+
+
+    // API route - returns JSON for Swagger
+  
 
     // Show form to create new department
     public function create()
