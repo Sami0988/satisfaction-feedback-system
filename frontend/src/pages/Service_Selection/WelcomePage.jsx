@@ -1,9 +1,15 @@
-
 import React, { useState } from "react";
-const WelcomePage=()=> {
+import { useNavigate } from "react-router-dom";
+
+const WelcomePage = () => {
   const [name, setName] = useState("");
   const [submittedName, setSubmittedName] = useState(null);
   const [error, setError] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNext = () => {
+    navigate("/department"); // 👈 your route path here
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,7 +38,6 @@ const WelcomePage=()=> {
 
       {/* Foreground Content */}
       <div className="relative z-10 w-full max-w-5xl bg-white/80 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        
         {/* Left Card */}
         <div className="md:w-1/2 bg-gradient-to-br from-blue-500 to-purple-300 text-white flex flex-col items-center justify-center p-10 text-center">
           <h2 className="text-4xl font-extrabold mb-6 tracking-wide">
@@ -48,14 +53,16 @@ const WelcomePage=()=> {
 
         {/* Right Card */}
         <div className="md:w-1/2 p-10 flex flex-col justify-center">
-          <h2 className="text-3xl font-semibold text-gray-800 mb-4">Enter Your Name</h2>
+          <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+            Enter Your Name
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if (error) setError(false); 
+                if (error) setError(false);
               }}
               placeholder="Enter your name"
               className={`w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition ${
@@ -78,6 +85,7 @@ const WelcomePage=()=> {
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
+              onClick={handleNext}
             >
               Next
             </button>
@@ -91,8 +99,6 @@ const WelcomePage=()=> {
       </div>
     </div>
   );
-}
-
-
+};
 
 export default WelcomePage;
