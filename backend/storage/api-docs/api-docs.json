@@ -9,6 +9,30 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/departments": {
+            "get": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Get a list of all departments",
+                "operationId": "31b84dc4677f87abec49dfa25a044ba7",
+                "responses": {
+                    "200": {
+                        "description": "A list of departments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Department"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users": {
             "get": {
                 "tags": [
@@ -24,7 +48,56 @@
             }
         }
     },
+    "components": {
+        "schemas": {
+            "Department": {
+                "title": "Department",
+                "required": [
+                    "id",
+                    "name",
+                    "code",
+                    "email",
+                    "phone"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Finance"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "FIN"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "finance@company.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+251912345678"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
     "tags": [
+        {
+            "name": "Departments",
+            "description": "Departments"
+        },
         {
             "name": "Users",
             "description": "Users"

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 const WelcomePage=()=> {
   const [name, setName] = useState("");
@@ -93,5 +94,5 @@ const WelcomePage=()=> {
 }
 
 
-export default WelcomePage;
 
+export default WelcomePage;
