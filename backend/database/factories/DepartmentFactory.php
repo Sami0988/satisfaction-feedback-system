@@ -21,7 +21,6 @@ class DepartmentFactory extends Factory
             'department_id'=> Str::uuid(),
             'name'=>$this->faker->company,
             'code' => 'DEP-' . \Illuminate\Support\Str::uuid(),
-            'type'=>$this->faker->randomElement(['HR','Finance','IT','Dirctorate','Law','unit']),
             'email'=>$this->faker->optional(0.7)->companyEmail,
             'phone'=>$this->faker->optional(0.7)->phoneNumber,
         ];

@@ -1,0 +1,86 @@
+
+services:
+  laravel.test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sail-8.3/app
+    environment:
+      WWWUSER: ${WWWUSER:-1000}
+      WWWGROUP: ${WWWGROUP:-1000}
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      DB_HOST: pgsql
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-customer_satisfaction}
+      DB_USERNAME: ${DB_USERNAME:-sami}
+      DB_PASSWORD: ${DB_PASSWORD:-sami}
+    volumes:
+      - "./backend:/var/www/html"
+    networks:
+      - sail
+    depends_on:
+      - pgsql
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - "./backend:/var/www/html:ro"
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
+    depends_on:
+      - laravel.test
+    networks:
+      - sail
+
+  pgsql:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: customer_satisfaction
+      POSTGRES_USER: ${DB_USERNAME:-sami}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sami}
+    volumes:
+      - "sail-pgsql:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sami -d customer_satisfaction"] 
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sail
+
+  pgadmin:
+    image: dpage/pgadmin4:8.5 
+    environment:
+      PGADMIN_DEFAULT_EMAIL: sami@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: sami
+    ports:
+      - "8090:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: unless-stopped
+    networks:
+      - sail
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    stdin_open: true
+    tty: true
+
+networks:
+  sail:
+    driver: bridge
+
+volumes:
+  sail-pgsql:
+    driver: local
+  pgadmin-data:
+    driver: local
