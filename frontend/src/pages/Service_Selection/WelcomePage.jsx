@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-
-export default function WelcomePage() {
+const WelcomePage=()=> {
   const [name, setName] = useState("");
   const [submittedName, setSubmittedName] = useState(null);
   const [error, setError] = useState(false);
@@ -94,5 +93,5 @@ export default function WelcomePage() {
 }
 
 
-
+export default WelcomePage;
 
