@@ -92,7 +92,4 @@ export default function WelcomePage() {
     </div>
   );
 }
-
-
-
-
+export default WelcomePage;

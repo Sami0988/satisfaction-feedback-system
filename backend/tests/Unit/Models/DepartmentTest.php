@@ -54,7 +54,6 @@ class DepartmentTest extends TestCase
             'department_id',
             'name',
             'code',
-            'type',
             'email',
             'phone',
         ];
