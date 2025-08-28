@@ -6,4 +6,4 @@ const ServicePage = () => {
   )
 }
 
-export default ServicePage
+export default ServicePage;
