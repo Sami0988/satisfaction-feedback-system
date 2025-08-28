@@ -26,7 +26,7 @@ const handleSubmit = (e) => {
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{
-          backgroundImage: "url('/images/background.jpg')", // Your local image path
+          backgroundImage: "url('/images/background.jpg')", 
         }}
       >
         {/* Optional overlay */}
