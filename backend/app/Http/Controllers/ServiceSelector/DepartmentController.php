@@ -52,7 +52,7 @@ class DepartmentController extends Controller
 
 
     // API route - returns JSON for Swagger
-  
+
 
     // Show form to create new department
     public function create()

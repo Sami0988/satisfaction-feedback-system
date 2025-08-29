@@ -15,10 +15,10 @@ return new class extends Migration
             $table->uuid('department_id')->primary();
             $table->String('name',150);
             $table->String('code',50);
-            $table->string('type', 100);
+
             $table->String('email', 150)->nullable();
             $table->String('phone', 50)->nullable();
-        
+
             $table->timestamps();
 
             $table->index('code');
