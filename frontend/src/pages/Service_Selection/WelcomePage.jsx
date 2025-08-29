@@ -9,27 +9,29 @@ const WelcomePage=()=> {
 const handleSubmit = (e) => {
   e.preventDefault();
 
-  if (!name.trim()) {
+  const trimmedName = name.trim();
+
+  // Validation: check if name is too short or contains numbers
+  const hasNumbers = /\d/.test(trimmedName);
+  if (trimmedName.length < 3 || hasNumbers) {
     setError(true);
     return;
   }
-  else{
-    window.alert(error);
-  }
 
   setError(false);
-  setSubmittedName(name.trim());
+  setSubmittedName(trimmedName);
   setName("");
 };
 
 
+
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
       {/* ✅ Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{
-          backgroundImage: "url('/images/background.jpg')", 
+          backgroundImage: "url('/images/background.jpg')", // Your local image path
         }}
       >
         {/* Optional overlay */}
@@ -44,11 +46,13 @@ const handleSubmit = (e) => {
           <h2 className="text-4xl font-extrabold mb-6 tracking-wide">
             Welcome to Ethiopian Civil Service Commission
           </h2>
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/1995/1995515.png"
-            alt="Hello Avatar"
-            className="w-36 h-36 mb-6 drop-shadow-lg"
-          />
+<img
+  src="https://thumbs.dreamstime.com/b/cheerful-cartoon-man-dark-hair-beard-colorful-shirt-waving-hello-full-body-vector-illustration-friendly-man-378936847.jpg"
+  alt="Welcome Avatar"
+  className="w-48 h-auto mb-6 drop-shadow-lg"
+/>
+
+
           <p className="text-lg opacity-90">We're glad to see you here!</p>
         </div>
 
@@ -70,10 +74,16 @@ const handleSubmit = (e) => {
             >
              Next
             </button>
+            {error && (
+  <p className="mt-4 text-red-600 font-medium">
+    Please enter a valid name.
+  </p>
+)}
+
           </form>
           {submittedName && (
   <p className="mt-6 text-green-600 text-lg font-medium">
-    Hello, {submittedName}! 👋
+    Hello, {submittedName}! Welcome to FCSC 👋
   </p>
           )}
         </div>
