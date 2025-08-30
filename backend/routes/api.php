@@ -1,13 +1,18 @@
 <?php
 
 use App\Http\Controllers\ServiceSelector\DepartmentController;
+use App\Http\Controllers\ServiceSelector\FeedbackFormController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Controller;
 
+Route::get('/feedback-forms', [FeedbackFormController::class, 'index']);
+Route::post('/feedback-forms', [FeedbackFormController::class, 'store']);
+Route::get('/feedback-forms/{id}', [FeedbackFormController::class, 'show']);
+Route::put('/feedback-forms/{id}', [FeedbackFormController::class, 'update']);
+Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']);
 
-Route::get('/departments', [DepartmentController::class, 'apiIndex']);
-Route::put('/departments', [DepartmentController::class, 'create']);
-Route::post('/departments', [DepartmentController::class, 'store']);
-Route::get('/departments/{id}', [DepartmentController::class, 'show']);
-Route::put('/departments/{id}', [DepartmentController::class, 'update']);
-Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
+
+
+
+
+Route::apiResource('departments', DepartmentController::class);

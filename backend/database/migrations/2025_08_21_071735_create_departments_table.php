@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('code');
-            $table->index('type');
+            //$table->index('type');
             $table->index('name');
 
         });
