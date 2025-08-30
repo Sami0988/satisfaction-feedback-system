@@ -1,34 +1,22 @@
 <?php
-
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Department;
+use App\Models\Service;
 
 class DepartmentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
-        \App\Models\Department::insert([
-        [
-            'name' => 'Finance',
-            'code' => 'FIN',
-            'email' => 'finance@company.com',
-            'phone' => '+251912345678',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ],
-        [
-            'name' => 'HR',
-            'code' => 'HR',
-            'email' => 'hr@company.com',
-            'phone' => '+251987654321',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]
-    ]);
+        // Create 15 departments
+        $departments = Department::factory()->count(15)->create();
+
+        // For each department, create 3-8 services with the same department_id
+        $departments->each(function ($department) {
+            Service::factory()->count(rand(3, 8))->create([
+                'department_id' => $department->department_id
+            ]);
+        });
     }
 }
