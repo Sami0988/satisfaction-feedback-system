@@ -1,16 +1,19 @@
-// components/LoadingSpinner.jsx
-
 const LoadingSpinner = ({
   height = "h-64",
   size = "h-12 w-12",
   borderColor = "border-blue-500",
   spinnerType = "pulse", // pulse, double, chase, dots, flip, ring
   message = "Loading...",
+  darkMode = false,
 }) => {
-  // Pulse spinner (default)
+  // Pulse spinner
   const PulseSpinner = () => (
     <div
-      className={`animate-pulse rounded-full ${size} ${borderColor} bg-gradient-to-r from-blue-500 to-purple-600`}
+      className={`animate-pulse rounded-full ${size} ${
+        darkMode
+          ? "bg-gray-700"
+          : "bg-gradient-to-r from-blue-500 to-purple-600"
+      }`}
     ></div>
   );
 
@@ -18,10 +21,14 @@ const LoadingSpinner = ({
   const DoubleSpinner = () => (
     <div className="relative">
       <div
-        className={`animate-spin rounded-full ${size} border-t-2 border-b-2 ${borderColor}`}
+        className={`animate-spin rounded-full ${size} border-t-2 border-b-2 ${
+          darkMode ? "border-gray-500" : borderColor
+        }`}
       ></div>
       <div
-        className={`animate-spin animation-delay-1000 absolute top-0 left-0 rounded-full ${size} border-r-2 border-l-2 border-green-500`}
+        className={`animate-spin animation-delay-1000 absolute top-0 left-0 rounded-full ${size} border-r-2 border-l-2 ${
+          darkMode ? "border-gray-400" : "border-green-500"
+        }`}
       ></div>
     </div>
   );
@@ -36,7 +43,11 @@ const LoadingSpinner = ({
           style={{ animationDelay: `${i * 0.1}s` }}
         >
           <div
-            className={`w-1/3 h-1/3 rounded-full bg-gradient-to-r from-blue-400 to-purple-500`}
+            className={`w-1/3 h-1/3 rounded-full ${
+              darkMode
+                ? "bg-gray-500"
+                : "bg-gradient-to-r from-blue-400 to-purple-500"
+            }`}
           ></div>
         </div>
       ))}
@@ -49,7 +60,11 @@ const LoadingSpinner = ({
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
-          className={`animate-bounce rounded-full bg-gradient-to-r from-blue-500 to-purple-600`}
+          className={`animate-bounce rounded-full ${
+            darkMode
+              ? "bg-gray-400"
+              : "bg-gradient-to-r from-blue-500 to-purple-600"
+          }`}
           style={{
             width: "10px",
             height: "10px",
@@ -63,7 +78,11 @@ const LoadingSpinner = ({
   // Flip spinner
   const FlipSpinner = () => (
     <div
-      className={`animate-flip ${size} bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg`}
+      className={`animate-flip ${size} rounded-lg ${
+        darkMode
+          ? "bg-gray-700"
+          : "bg-gradient-to-r from-blue-500 to-purple-600"
+      }`}
     ></div>
   );
 
@@ -71,7 +90,9 @@ const LoadingSpinner = ({
   const RingSpinner = () => (
     <div className="relative">
       <div
-        className={`${size} rounded-full absolute border-4 border-gray-200`}
+        className={`${size} rounded-full absolute border-4 ${
+          darkMode ? "border-gray-600" : "border-gray-200"
+        }`}
       ></div>
       <div
         className={`${size} rounded-full animate-spin border-4 border-transparent border-t-blue-500 border-r-purple-500 border-b-pink-500 border-l-green-500`}
@@ -102,7 +123,15 @@ const LoadingSpinner = ({
       className={`flex flex-col justify-center items-center ${height} space-y-4`}
     >
       {renderSpinner()}
-      {message && <p className="text-gray-600 animate-pulse">{message}</p>}
+      {message && (
+        <p
+          className={`${
+            darkMode ? "text-gray-300" : "text-gray-600"
+          } animate-pulse`}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
 };

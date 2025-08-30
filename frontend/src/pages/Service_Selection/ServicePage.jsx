@@ -2,33 +2,45 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getServicesByDepartment } from "../../api/serviece";
 import { useDarkMode } from "../../context/DarkModeContext";
+import LoadingSpinner from "../../utils/LoadingSpinner";
+import ErrorDisplay from "../../utils/ErrorDisplay";
+import { getItemsPerPage } from "../../utils/getItemsPerPage";
+import { useDebounce } from "../../utils/useDebounce";
 
 function ServicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(4);
+  const [itemsPerPage, setItemsPerPage] = useState(getItemsPerPage());
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const { departmentId } = useParams(); 
-
+  const { departmentId } = useParams();
   const { darkMode } = useDarkMode();
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // Update itemsPerPage on window resize
+  useEffect(() => {
+    const handleResize = () => setItemsPerPage(getItemsPerPage());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Fetch services by department
   useEffect(() => {
     const fetchServices = async () => {
       try {
         setLoading(true);
-        if (!departmentId) throw new Error("Department ID is missing!");
-        console.log(departmentId);
+        setError(null);
 
+        if (!departmentId) throw new Error("Department ID is missing!");
         const response = await getServicesByDepartment(departmentId);
         setServices(response.data || response);
       } catch (err) {
-        setError("Failed to fetch services. Please try again later.");
         console.error("Error fetching services:", err);
+        setError("Failed to fetch services. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -38,15 +50,17 @@ function ServicesPage() {
   }, [departmentId]);
 
   const handleCardClick = (serviceId) => {
-    navigate(`/employee`); // Or navigate to `/services/${serviceId}`
+    navigate(`/employee`);
   };
 
-  // Filter services based on search term
+  // Filter services based on debounced search term
   const filteredServices = services.filter(
     (service) =>
-      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchTerm.toLowerCase())
+      service.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      service.description
+        .toLowerCase()
+        .includes(debouncedSearchTerm.toLowerCase()) ||
+      service.category.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   // Pagination
@@ -63,48 +77,21 @@ function ServicesPage() {
   // Reset to first page when search term changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [debouncedSearchTerm]);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading services...</p>
-        </div>
-      </div>
+      <LoadingSpinner
+        darkMode={darkMode}
+        height="h-screen"
+        message="Loading services..."
+      />
     );
-  }
 
-  if (error) {
+  if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-red-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">Error</h3>
-          <p className="mt-1 text-gray-500">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorDisplay error={error} onRetry={() => window.location.reload()} />
     );
-  }
 
   return (
     <div
@@ -118,16 +105,16 @@ function ServicesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1
-            className={`text-4xl font-bold ${
+            className={`text-4xl font-bold mb-4 ${
               darkMode ? "text-indigo-400" : "text-indigo-800"
-            } mb-4`}
+            }`}
           >
             Services
           </h1>
           <p
-            className={`text-lg ${
+            className={`text-lg max-w-2xl ${
               darkMode ? "text-gray-300" : "text-gray-600"
-            } max-w-2xl`}
+            }`}
           >
             Explore our services under this department.
           </p>
@@ -254,19 +241,6 @@ function ServicesPage() {
                 darkMode ? "bg-gray-800" : "bg-white"
               }`}
             >
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
               <h3
                 className={`mt-4 text-lg font-medium ${
                   darkMode ? "text-white" : "text-gray-900"
@@ -293,16 +267,12 @@ function ServicesPage() {
               disabled={currentPage === 1}
               className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                 currentPage === 1
-                  ? `cursor-not-allowed ${
-                      darkMode
-                        ? "bg-gray-700 text-gray-500"
-                        : "bg-gray-200 text-gray-400"
-                    }`
-                  : `${
-                      darkMode
-                        ? "bg-indigo-900 text-indigo-200 hover:bg-indigo-800"
-                        : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-                    }`
+                  ? darkMode
+                    ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : darkMode
+                  ? "bg-indigo-900 text-indigo-200 hover:bg-indigo-800"
+                  : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
               }`}
             >
               Previous
@@ -316,11 +286,9 @@ function ServicesPage() {
                   className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                     currentPage === number
                       ? "bg-indigo-600 text-white"
-                      : `${
-                          darkMode
-                            ? "bg-indigo-900 text-indigo-200 hover:bg-indigo-800"
-                            : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-                        }`
+                      : darkMode
+                      ? "bg-indigo-900 text-indigo-200 hover:bg-indigo-800"
+                      : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                   }`}
                 >
                   {number}
@@ -333,16 +301,12 @@ function ServicesPage() {
               disabled={currentPage === totalPages}
               className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                 currentPage === totalPages
-                  ? `cursor-not-allowed ${
-                      darkMode
-                        ? "bg-gray-700 text-gray-500"
-                        : "bg-gray-200 text-gray-400"
-                    }`
-                  : `${
-                      darkMode
-                        ? "bg-indigo-900 text-indigo-200 hover:bg-indigo-800"
-                        : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-                    }`
+                  ? darkMode
+                    ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : darkMode
+                  ? "bg-indigo-900 text-indigo-200 hover:bg-indigo-800"
+                  : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
               }`}
             >
               Next

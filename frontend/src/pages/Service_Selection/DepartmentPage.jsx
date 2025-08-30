@@ -20,7 +20,7 @@ const DepartmentPage = () => {
   const { darkMode } = useDarkMode();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [ setSelectedDept] = useState(null);
+  const [setSelectedDept] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [departments, setDepartments] = useState([]);
@@ -202,6 +202,7 @@ const DepartmentPage = () => {
             size="h-16 w-16"
             spinnerType="ring"
             message="Loading departments..."
+            darkMode={darkMode}
           />
         ) : (
           <>
