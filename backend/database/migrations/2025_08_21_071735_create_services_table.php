@@ -15,10 +15,10 @@ return new class extends Migration
              $table->uuid('service_id')->primary();
             $table->uuid('department_id');
             $table->string('name', 150);
-            $table->string('category', 100)->nullable(); 
+            $table->string('category', 100)->nullable();
             $table->text('description')->nullable();
             $table->boolean('active')->default(true);
-           
+
 
             $table->foreign('department_id')
                   ->references('department_id')

@@ -153,6 +153,25 @@
                                         }
                                     },
                                     "type": "object"
+        "/api/feedback-forms": {
+            "get": {
+                "tags": [
+                    "FeedbackForms"
+                ],
+                "summary": "Get list of active feedback forms",
+                "description": "* @OA\\Get(\n*     path=\"/api/feedback-forms\",\n*     summary=\"Get list of active feedback forms\",\n*     tags={\"FeedbackForms\"},\n*     @OA\\Response(\n*         response=200,\n        description=\"List of active feedback forms\",",
+                "operationId": "0c1213d54e6d65503c76d14b8b0d7150",
+                "responses": {
+                    "200": {
+                        "description": "List of active feedback forms",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/FeedbackForm"
+                                    }
+
                                 }
                             }
                         }
@@ -217,6 +236,40 @@
                     }
                 },
                 "type": "object"
+            },
+            "FeedbackForm": {
+                "required": [
+                    "form_id",
+                    "service_id",
+                    "name"
+                ],
+                "properties": {
+                    "form_id": {
+                        "description": "* @OA\\Schema(\n*     schema=\"FeedbackForm\",\n*     required={\"form_id\",\"service_id\",\"name\"},\n*     @OA\\Property(property=\"form_id\", type=\"string\", format=\"uuid\"),\n*     @OA\\Property(property=\"service_id\", type=\"string\", format=\"uuid\"),\n*     @OA\\Property(property=\"name\", type=\"string\", maxLength=150),\n*     @OA\\Property(property=\"description\", type=\"string\", nullable=true), *     @OA\\Property(property=\"language\", type=\"string\", maxLength=20),\n*     @OA\\Property(property=\"active\", type=\"boolean\"),\n* )",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "service_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "language": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -228,6 +281,11 @@
         {
             "name": "Services",
             "description": "Services"
+        },
+        {
+            "name": "FeedbackForms",
+            "description": "FeedbackForms"
+
         },
         {
             "name": "Users",

@@ -12,6 +12,7 @@ class Department extends Model
 
     protected $table = 'departments';
     protected $primaryKey = 'department_id';
+
     public $incrementing = false;
     protected $keyType = 'string';
 
