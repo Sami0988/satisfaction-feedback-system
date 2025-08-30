@@ -20,7 +20,7 @@ const DepartmentPage = () => {
   const { darkMode } = useDarkMode();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDept, setSelectedDept] = useState(null);
+  const [ setSelectedDept] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [departments, setDepartments] = useState([]);
