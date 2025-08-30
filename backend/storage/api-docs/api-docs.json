@@ -33,6 +33,133 @@
                 }
             }
         },
+        "/api/departments/{department_id}/services": {
+            "get": {
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get services by department",
+                "description": "Fetch a paginated list of services that belong to the given department",
+                "operationId": "3fc6f33fa3eff718c88b72240a710041",
+                "parameters": [
+                    {
+                        "name": "department_id",
+                        "in": "path",
+                        "description": "The UUID of the department",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "0065f9a0-ce4d-422f-9640-e2a03ea888ce"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of services retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "service_id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                                                    },
+                                                    "department_id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "0065f9a0-ce4d-422f-9640-e2a03ea888ce"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "IT Support"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "Technical"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Handles all IT-related issues"
+                                                    },
+                                                    "active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-08-30T10:15:30Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-08-30T10:15:30Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8080/api/departments/0065f9a0-ce4d-422f-9640-e2a03ea888ce/services?page=1"
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 50
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users": {
             "get": {
                 "tags": [
@@ -97,6 +224,10 @@
         {
             "name": "Departments",
             "description": "Departments"
+        },
+        {
+            "name": "Services",
+            "description": "Services"
         },
         {
             "name": "Users",
