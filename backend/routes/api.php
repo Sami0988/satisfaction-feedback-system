@@ -3,6 +3,8 @@
 use App\Http\Controllers\ServiceSelector\DepartmentController;
 use App\Http\Controllers\ServiceSelector\FeedbackFormController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ServiceSelector\ServiceController;
+
 use App\Http\Controllers\Controller;
 
 Route::get('/feedback-forms', [FeedbackFormController::class, 'index']);
@@ -12,6 +14,7 @@ Route::put('/feedback-forms/{id}', [FeedbackFormController::class, 'update']);
 Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']);
 
 
+Route::get('/departments/{department_id}/services', [ServiceController::class, 'index']);
 
 
 
