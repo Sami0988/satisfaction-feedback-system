@@ -1,14 +1,13 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "../../context/DarkModeContext";
 
 const DepartmentCard = ({ dept, index, hoveredCard, setHoveredCard }) => {
   const navigate = useNavigate();
   const { darkMode } = useDarkMode();
 
-
   const handleClick = () => {
-     navigate(`/service/${dept.department_id || dept.id}`);
+    navigate(`/service/${dept.department_id || dept.id}`);
   };
 
   return (
