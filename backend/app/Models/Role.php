@@ -26,20 +26,26 @@ class Role extends Model
         'role_id' => 'string',
     ];
 
-    public function users(): BelongsToMany
+    /**
+     * Many-to-many relationship between roles and employees.
+     */
+    public function employees(): BelongsToMany
     {
         return $this->belongsToMany(
-            User::class,
-            'user_role',
-            'role_id',
-            'user_id',
-            'role_id',
-            'user_id'
-        )->using(UserRole::class);
+            Employee::class,
+            'employee_role', 
+            'role_id',          
+            'employee_id',     
+            'role_id',         
+            'employee_id'      
+        )->using(EmployeeRole::class);
     }
 
-    public function userRoles(): HasMany
+    /**
+     * One-to-many relationship with the pivot itself.
+     */
+    public function employeeRoles(): HasMany
     {
-        return $this->hasMany(UserRole::class, 'role_id', 'role_id');
+        return $this->hasMany(EmployeeRole::class, 'role_id', 'role_id');
     }
 }

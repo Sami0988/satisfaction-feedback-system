@@ -17,19 +17,14 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        $userType = $this->faker->randomElement(['Citizen', 'Employee', 'Staff']);
-
         return [
-            'user_id'=>Str::uuid(),
-            'full_name'=>$this->faker->name(3,true),
-            'phone'=>$this->faker->optional(0.7)->phoneNumber,
+            'user_id' => Str::uuid(),
+            'full_name' => $this->faker->name(),
+            'phone' => $this->faker->optional(0.7)->phoneNumber,
             'email' => $this->faker->unique()->safeEmail(),
-
-            'user_type'=>$userType,
-            'national_id'=>$userType==='Citizen'? $this->faker->numerify('#########'):null,
-            'active'=>$this->faker->boolean(90),
-
-
+            'user_type' => 'Citizen', // ✅ always Citizen
+            'national_id' => $this->faker->numerify('#########'),
+            'active' => $this->faker->boolean(90),
         ];
     }
 }
