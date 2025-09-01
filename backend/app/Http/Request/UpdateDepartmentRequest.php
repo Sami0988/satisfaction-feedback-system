@@ -27,7 +27,7 @@ class UpdateDepartmentRequest extends FormRequest
     public function messages()
     {
         return [
-            'phone.regex' => 'The phone number format is invalid.',
+            'phone.regex' => 'The phone number format is invalid.', 
         ];
     }
 }
