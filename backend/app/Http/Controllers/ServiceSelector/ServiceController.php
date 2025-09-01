@@ -36,7 +36,7 @@ use App\Http\Controllers\Controller;
  *             @OA\Property(property="current_page", type="integer", example=1),
  *             @OA\Property(property="data", type="array",
  *                 @OA\Items(
- *                     type="object",  // ← COMMA ADDED HERE
+ *                     type="object",
  *                     @OA\Property(property="service_id", type="string", format="uuid", example="123e4567-e89b-12d3-a456-426614174000"),
  *                     @OA\Property(property="department_id", type="string", format="uuid", example="0065f9a0-ce4d-422f-9640-e2a03ea888ce"),
  *                     @OA\Property(property="name", type="string", example="IT Support"),
@@ -64,6 +64,7 @@ use App\Http\Controllers\Controller;
  *     )
  * )
  */
+
 class ServiceController extends Controller
 {
     public function index(Request $request, $departmentId)
