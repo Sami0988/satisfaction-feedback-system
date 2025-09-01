@@ -36,7 +36,7 @@ use App\Http\Controllers\Controller;
  *             @OA\Property(property="current_page", type="integer", example=1),
  *             @OA\Property(property="data", type="array",
  *                 @OA\Items(
- *                     type="object",
+ *                     type="object",  // ← COMMA ADDED HERE
  *                     @OA\Property(property="service_id", type="string", format="uuid", example="123e4567-e89b-12d3-a456-426614174000"),
  *                     @OA\Property(property="department_id", type="string", format="uuid", example="0065f9a0-ce4d-422f-9640-e2a03ea888ce"),
  *                     @OA\Property(property="name", type="string", example="IT Support"),
@@ -66,29 +66,27 @@ use App\Http\Controllers\Controller;
  */
 class ServiceController extends Controller
 {
-   
-      public function index(Request $request, $departmentId)
+    public function index(Request $request, $departmentId)
     {
         $services = Service::where('department_id', $departmentId)
             ->paginate(10);
 
         return response()->json($services);
     }
+
     public function search(Request $request)
-{
-    $searchTerm = $request->input('name'); // Get the search term from query parameters
+    {
+        $searchTerm = $request->input('name');
 
-    if (!$searchTerm) {
-        return response()->json([
-            'message' => 'Please provide a service name to search.'
-        ], 400);
+        if (!$searchTerm) {
+            return response()->json([
+                'message' => 'Please provide a service name to search.'
+            ], 400);
+        }
+
+        $services = Service::where('name', 'like', "%{$searchTerm}%")
+            ->paginate(10);
+
+        return response()->json($services);
     }
-
-    $services = Service::where('name', 'like', "%{$searchTerm}%")
-        ->paginate(10);
-
-    return response()->json($services);
-}
-
-
 }

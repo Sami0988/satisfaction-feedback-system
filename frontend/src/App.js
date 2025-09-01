@@ -1,7 +1,8 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { DarkModeProvider } from "./context/DarkModeContext";
+import { DarkModeProvider, useDarkMode } from "./context/DarkModeContext";
 import Layout from "./components/Layout";
+import LoadingSpinner from "./utils/LoadingSpinner";
 
 // lazy imports
 const WelcomePage = lazy(() => import("./pages/Service_Selection/WelcomePage"));
@@ -13,16 +14,21 @@ const EmployeePage = lazy(() =>
   import("./pages/Service_Selection/EmployeePage")
 );
 
+const SuspenseFallback = () => {
+  const { darkMode } = useDarkMode();
+  return <LoadingSpinner darkMode={darkMode} height="h-screen" />;
+};
+
 function App() {
   return (
     <DarkModeProvider>
       <Router>
         <Layout>
-          <Suspense fallback={<div className="p-6">Loading...</div>}>
+          <Suspense fallback={<SuspenseFallback />}>
             <Routes>
               <Route path="/" element={<WelcomePage />} />
               <Route path="/department" element={<DepartmentPage />} />
-              <Route path="/service" element={<ServicePage />} />
+              <Route path="/service/:departmentId" element={<ServicePage />} />
               <Route path="/employee" element={<EmployeePage />} />
             </Routes>
           </Suspense>
@@ -32,6 +38,3 @@ function App() {
   );
 }
 export default App;
-
-
-

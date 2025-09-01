@@ -10,6 +10,19 @@ export const getServices = async () => {
   }
 };
 
+export const getServicesByDepartment = async (departmentId) => {
+  try {
+    const response = await API.get(`/departments/${departmentId}/services`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching services for department ${departmentId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
 export const getServiceById = async (id) => {
   try {
     const response = await API.get(`/services/${id}`);

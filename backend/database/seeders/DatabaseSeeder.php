@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@example.com',
             'department_id' => null,
             'service_id' => null,
-            'password' => bcrypt('password'), // important!
+            'password' => bcrypt('password'),
         ]);
         $admin->roles()->attach($adminRole->role_id);
 
@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
         $employees->each(function ($employee) use ($employeeRole) {
             $employee->roles()->attach($employeeRole->role_id);
 
-            // Assign a random service directly (not via pivot)
+            // Assign a random service directly
             $service = \App\Models\Service::inRandomOrder()->first();
             if ($service) {
                 $employee->service_id = $service->service_id;
