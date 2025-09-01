@@ -67,7 +67,7 @@ const DepartmentPage = () => {
     }
   }, []);
 
-  // Handle window resize
+  // Handle  resize
   useEffect(() => {
     const handleResize = debounce(
       () => fetchDepartments(currentPage, searchTerm),
