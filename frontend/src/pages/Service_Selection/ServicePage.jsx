@@ -50,7 +50,7 @@ function ServicesPage() {
   }, [departmentId]);
 
   const handleCardClick = (serviceId) => {
-    navigate(`/employee`);
+   navigate(`/employee/${departmentId}/${serviceId}`);
   };
 
   // Filter services based on debounced search term

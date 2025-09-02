@@ -29,7 +29,10 @@ function App() {
               <Route path="/" element={<WelcomePage />} />
               <Route path="/department" element={<DepartmentPage />} />
               <Route path="/service/:departmentId" element={<ServicePage />} />
-              <Route path="/employee" element={<EmployeePage />} />
+              <Route
+                path="employee/:departmentId/:serviceId"
+                element={<EmployeePage />}
+              />
             </Routes>
           </Suspense>
         </Layout>
