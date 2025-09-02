@@ -49,7 +49,7 @@ const EmployeePage = () => {
     };
 
     fetchEmployee();
-  }, []);
+  },[departmentId, serviceId]);
 
   const handleAccept = () => {
     setEmployee((prev) => ({ ...prev, status: "accepted" }));
