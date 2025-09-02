@@ -3,7 +3,16 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+/**
+ * @OA\Schema(
+ *     schema="StoreDepartmentRequest",
+ *     type="object",
+ *     required={"name", "code"},
+ *     @OA\Property(property="name", type="string", example="Finance"),
+ *     @OA\Property(property="code", type="string", example="FIN"),
+ *     @OA\Property(property="type", type="string", example="Administrative")
+ * )
+ */
 class StoreDepartmentRequest extends FormRequest
 {
     public function authorize()

@@ -11,18 +11,655 @@
     "paths": {
         "/api/departments": {
             "get": {
-                "tags": ["Departments"],
-                "summary": "Get a list of all departments",
-                "operationId": "listDepartments",
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Get paginated list of departments",
+                "operationId": "46c5acb83398dd9897d27b66779c8259",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 12
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "A list of departments",
+                        "description": "List of departments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Department"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Create a new department",
+                "operationId": "e6ea302d078a8683bb40324c5b861892",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "code",
+                                    "email",
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Finance"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "FIN"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "finance@company.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+251912345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Department created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Department"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/departments/{id}": {
+            "get": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Get a single department",
+                "operationId": "c22826a879807822ac7640d5c1ed442d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Department ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Department details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Department"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Update a department",
+                "operationId": "daba314d03b84ca8a88bcbde2b008db1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Department ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "code",
+                                    "email",
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Finance Updated"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "FIN_UPD"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "finance.updated@company.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+251998765432"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Department updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Department"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Delete a department",
+                "operationId": "ee980ede6f03c8a2787c9393b3cec48e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Department ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Department deleted successfully"
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/employees": {
+            "get": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Get list of employees (with optional filters)",
+                "operationId": "403008212a8cd7a14ee7c4bce39f495c",
+                "parameters": [
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter by department ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "service_id",
+                        "in": "query",
+                        "description": "Filter by service ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of employees"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Create a new employee",
+                "operationId": "898f862f498df3ce80a3775c9cc1b25b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "full_name",
+                                    "email",
+                                    "department_id",
+                                    "service_id",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0911223344"
+                                    },
+                                    "department_id": {
+                                        "type": "string",
+                                        "example": "dep-uuid"
+                                    },
+                                    "service_id": {
+                                        "type": "string",
+                                        "example": "srv-uuid"
+                                    },
+                                    "active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Employee created successfully"
+                    }
+                }
+            }
+        },
+        "/api/employees/{id}": {
+            "get": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Get a single employee by ID",
+                "operationId": "ab825238ce56c7a650908295646029a6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Employee ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Employee details"
+                    },
+                    "404": {
+                        "description": "Employee not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Update an employee",
+                "operationId": "8a7ad8b11754d7cef83fe020126918b9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Employee ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Jane Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "jane@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0911334455"
+                                    },
+                                    "department_id": {
+                                        "type": "string",
+                                        "example": "dep-uuid"
+                                    },
+                                    "service_id": {
+                                        "type": "string",
+                                        "example": "srv-uuid"
+                                    },
+                                    "active": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpass123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Employee updated successfully"
+                    },
+                    "404": {
+                        "description": "Employee not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Delete an employee",
+                "operationId": "729dda9850cd3bc60411f5be961b4973",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Employee ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Employee deleted successfully"
+                    },
+                    "404": {
+                        "description": "Employee not found"
+                    }
+                }
+            }
+        },
+        "/api/feedback-forms": {
+            "get": {
+                "tags": [
+                    "FeedbackForms"
+                ],
+                "summary": "Get list of active feedback forms",
+                "description": "* @OA\\Get(\n*     path=\"/api/feedback-forms\",\n*     summary=\"Get list of active feedback forms\",\n*     tags={\"FeedbackForms\"},\n*     @OA\\Response(\n*         response=200,\n        description=\"List of active feedback forms\",",
+                "operationId": "0c1213d54e6d65503c76d14b8b0d7150",
+                "responses": {
+                    "200": {
+                        "description": "List of active feedback forms",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Department"
+                                        "$ref": "#/components/schemas/FeedbackForm"
                                     }
                                 }
                             }
@@ -33,10 +670,12 @@
         },
         "/api/departments/{department_id}/services": {
             "get": {
-                "tags": ["Services"],
+                "tags": [
+                    "Services"
+                ],
                 "summary": "Get services by department",
                 "description": "Fetch a paginated list of services that belong to the given department",
-                "operationId": "getServicesByDepartment",
+                "operationId": "3fc6f33fa3eff718c88b72240a710041",
                 "parameters": [
                     {
                         "name": "department_id",
@@ -66,7 +705,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "current_page": {
                                             "type": "integer",
@@ -75,7 +713,6 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "type": "object",
                                                 "properties": {
                                                     "service_id": {
                                                         "type": "string",
@@ -113,7 +750,8 @@
                                                         "format": "date-time",
                                                         "example": "2025-08-30T10:15:30Z"
                                                     }
-                                                }
+                                                },
+                                                "type": "object"
                                             }
                                         },
                                         "first_page_url": {
@@ -132,7 +770,8 @@
                                             "type": "integer",
                                             "example": 50
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -142,35 +781,13 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
                                         "error": {
                                             "type": "string",
                                             "example": "Department not found"
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/feedback-forms": {
-            "get": {
-                "tags": ["FeedbackForms"],
-                "summary": "Get list of active feedback forms",
-                "operationId": "listFeedbackForms",
-                "responses": {
-                    "200": {
-                        "description": "List of active feedback forms",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/FeedbackForm"
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -180,9 +797,11 @@
         },
         "/api/users": {
             "get": {
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Get a list of all users",
-                "operationId": "listUsers",
+                "operationId": "c457726701591d1183b53aa71fc13441",
                 "responses": {
                     "200": {
                         "description": "A list of users"
@@ -195,8 +814,13 @@
         "schemas": {
             "Department": {
                 "title": "Department",
-                "type": "object",
-                "required": ["id", "name", "code", "email", "phone"],
+                "required": [
+                    "id",
+                    "name",
+                    "code",
+                    "email",
+                    "phone"
+                ],
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -220,19 +844,26 @@
                     },
                     "created_at": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "updated_at": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
                     }
-                }
+                },
+                "type": "object"
             },
             "FeedbackForm": {
-                "type": "object",
-                "required": ["form_id", "service_id", "name"],
+                "required": [
+                    "form_id",
+                    "service_id",
+                    "name"
+                ],
                 "properties": {
                     "form_id": {
+                        "description": "* @OA\\Schema(\n*     schema=\"FeedbackForm\",\n*     required={\"form_id\",\"service_id\",\"name\"},\n*     @OA\\Property(property=\"form_id\", type=\"string\", format=\"uuid\"),\n*     @OA\\Property(property=\"service_id\", type=\"string\", format=\"uuid\"),\n*     @OA\\Property(property=\"name\", type=\"string\", maxLength=150),\n*     @OA\\Property(property=\"description\", type=\"string\", nullable=true), *     @OA\\Property(property=\"language\", type=\"string\", maxLength=20),\n*     @OA\\Property(property=\"active\", type=\"boolean\"),\n* )",
                         "type": "string",
                         "format": "uuid"
                     },
@@ -255,22 +886,54 @@
                     "active": {
                         "type": "boolean"
                     }
-                }
+                },
+                "type": "object"
+            },
+            "StoreDepartmentRequest": {
+                "required": [
+                    "name",
+                    "code"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Finance"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "FIN"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "Administrative"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
             }
         }
     },
     "tags": [
         {
             "name": "Departments",
-            "description": "Departments"
+            "description": "API Endpoints for managing departments"
+        },
+        {
+            "name": "Employees",
+            "description": "Employees"
+        },
+        {
+            "name": "FeedbackForms",
+            "description": "FeedbackForms"
         },
         {
             "name": "Services",
             "description": "Services"
-        },
-        {
-            "name": "FeedbackForms",
-            "description": "Feedback Forms"
         },
         {
             "name": "Users",
