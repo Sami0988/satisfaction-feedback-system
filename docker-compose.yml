@@ -67,11 +67,13 @@ services:
     build: ./frontend
     ports:
       - "3001:3000"
+    env_file:
+      - .env.docker  
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    environment:
-      - REACT_APP_API_URL=http://localhost:8080
+    depends_on:
+      - laravel.test
     stdin_open: true
     tty: true
 
