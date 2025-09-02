@@ -17,8 +17,6 @@ const EmployeePage = () => {
     const fetchEmployee = async () => {
       try {
         setLoading(true);
-        // You can pass departmentId and serviceId if needed
-        console.log(departmentId, serviceId);
         const response = await getEmployees(1, 10, departmentId, serviceId);
 
         if (response.data && response.data.length > 0) {
