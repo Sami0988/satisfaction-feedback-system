@@ -21,7 +21,7 @@ class ServiceFactory extends Factory
     return [
         'service_id'=> Str::uuid(),
         'department_id' => Department::factory(),
-        'name'=>$this->faker->word(3,true) .' service',
+        'name'=>$this->faker->word .' service',
         'category'=>$this->faker->randomElement([
             'Recruitment', 'Training', 'Consultation', 'Support',
             'Registration', 'Certification', 'Licensing', 'Complaint'
