@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const WelcomePage = () => {
   const [name, setName] = useState("");
-  const [submittedName, setSubmittedName] = useState(null);
+  const [setSubmittedName] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
