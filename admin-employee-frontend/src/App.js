@@ -1,3 +1,78 @@
-export default function App() {
-  return <h1 className="text-3xl font-bold underline">Hello world!</h1>;
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useSelector } from "react-redux";
+import Login from "./pages/Login/Login";
+import AdminDashboard from "./pages/Dashboard/AdminDashboard/AdminDashboard";
+import EmployeeDashboard from "./pages/Dashboard/EmployeeDashboard/EmployeeDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Navigation from "./components/Navigation";
+
+function App() {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  return (
+    <Router>
+      <div className="App">
+        {isAuthenticated && <Navigation />}
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? (
+                <Navigate
+                  to={
+                    user.role === "admin"
+                      ? "/admin/dashboard"
+                      : "/employee/dashboard"
+                  }
+                  replace
+                />
+              ) : (
+                <Login />
+              )
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/dashboard"
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <EmployeeDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <Navigate
+                to={
+                  isAuthenticated
+                    ? user.role === "admin"
+                      ? "/admin/dashboard"
+                      : "/employee/dashboard"
+                    : "/login"
+                }
+                replace
+              />
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
+
+export default App;
