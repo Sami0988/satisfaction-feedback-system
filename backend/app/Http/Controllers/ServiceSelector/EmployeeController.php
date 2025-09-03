@@ -33,22 +33,63 @@ class EmployeeController extends Controller
      *     @OA\Response(response=200, description="List of employees")
      * )
      */
-    public function index(Request $request)
+       public function index(Request $request)
     {
-        $query = Employee::query();
+        // Start the query builder with the relationships we need to eager load.
+        // This prevents the N+1 query problem.
+        $query = Employee::with(['department', 'service']);
 
-        if ($request->filled('department_id') && $request->filled('service_id')) {
-            $query->where('department_id', $request->department_id)
-                  ->where('service_id', $request->service_id);
-        } elseif ($request->filled('department_id')) {
+        // Filter by department ID if provided.
+        if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
-        } elseif ($request->filled('service_id')) {
+        }
+
+        // Filter by service ID if provided.
+        // This is now an independent check, allowing for combinations.
+        if ($request->filled('service_id')) {
             $query->where('service_id', $request->service_id);
         }
 
-        return response()->json($query->paginate(10));
-    }
+        // Search by service name using a partial match.
+        // Corrected the variable name from service_name to name.
+        // The relationship name was changed from 'services' to 'service'
+        // to match the Employee model's 'BelongsTo' relationship.
+        if ($request->filled('name')) {
+            $query->whereHas('service', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+        }
 
+        // Search by department floor.
+        // This filter assumes the 'departments' table has a 'floor' column.
+        if ($request->filled('floor')) {
+            $query->whereHas('department', function ($q) use ($request) {
+                $q->where('floor', 'like', '%' . $request->floor . '%');
+            });
+        }
+
+        // Get paginated results with a default of 10 employees per page.
+        $employees = $query->paginate(10);
+
+        // Transform the collection to include specific related data,
+        // and correct the employee's ID and name fields.
+        $employees->getCollection()->transform(function ($employee) {
+            return [
+                'employee_id' => $employee->employee_id, // Corrected from 'id'
+                'full_name' => $employee->full_name,   // Corrected from 'name'
+                'email' => $employee->email,
+                'phone' => $employee->phone,
+                'active' => $employee->active,
+                'department_name' => $employee->department->name ?? null,
+                'department_floor' => $employee->department->floor ?? null,
+                'service_name' => $employee->service->name ?? null,
+                'created_at' => $employee->created_at,
+                'updated_at' => $employee->updated_at,
+            ];
+        });
+
+        return response()->json($employees);
+    }
     /**
      * @OA\Post(
      *     path="/api/employees",

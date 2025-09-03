@@ -20,6 +20,7 @@ class Employee extends Authenticatable
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // The 'role_id' column is added to the fillable attributes
     protected $fillable = [
         'employee_id',
         'full_name',
@@ -28,6 +29,7 @@ class Employee extends Authenticatable
         'password',
         'department_id',
         'service_id',
+        'role_id',
         'active',
     ];
 
@@ -48,7 +50,7 @@ class Employee extends Authenticatable
     // Relationship to department 
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'department_id', 'id');
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
     // Relationship to service 
@@ -57,26 +59,20 @@ class Employee extends Authenticatable
         return $this->belongsTo(Service::class, 'service_id', 'service_id');
     }
 
-    // Roles many-to-many via employee_role pivot
-    public function roles(): BelongsToMany
+    // New one-to-many relationship: An Employee belongs to one Role.
+    public function role(): BelongsTo
     {
-        return $this->belongsToMany(
-            Role::class,
-            'employee_role',
-            'employee_id',
-            'role_id',
-            'employee_id',
-            'role_id'
-        )->using(EmployeeRole::class);
+        return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
 
+    // This relationship remains unchanged from your original code.
     public function services(): BelongsToMany
-{
-    return $this->belongsToMany(
-        \App\Models\Service::class,
-        'employee_service', 
-        'employee_id',    
-        'service_id'      
-    );
-}
+    {
+        return $this->belongsToMany(
+            \App\Models\Service::class,
+            'employee_service',
+            'employee_id',
+            'service_id'
+        );
+    }
 }

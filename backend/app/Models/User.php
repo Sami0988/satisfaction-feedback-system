@@ -57,8 +57,5 @@ class User extends Authenticatable
         return $this->hasMany(FeedbackResponse::class, 'user_id', 'user_id');
     }
 
-    public function userRoles(): HasMany
-    {
-        return $this->hasMany(UserRole::class, 'user_id', 'user_id');
-    }
+    
 }

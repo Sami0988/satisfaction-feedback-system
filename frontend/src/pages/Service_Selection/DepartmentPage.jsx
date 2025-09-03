@@ -15,9 +15,12 @@ import SearchBar from "../../components/Department/SearchBar";
 import DepartmentGrid from "../../components/Department/DepartmentGrid";
 import PaginationControls from "../../components/Department/PaginationControls";
 import { debounce } from "lodash";
+import { useLocation } from "react-router-dom";
 
 const DepartmentPage = () => {
   const { darkMode } = useDarkMode();
+  const location = useLocation();
+  const { userName } = location.state || {};
 
   const [currentPage, setCurrentPage] = useState(1);
   const [setSelectedDept] = useState(null);
@@ -27,7 +30,7 @@ const DepartmentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paginationMeta, setPaginationMeta] = useState({});
-
+  const displayName = userName || "Guest";
   const debouncedSearch = useRef(
     debounce((value) => fetchDepartments(1, value), 500)
   ).current;
@@ -174,14 +177,17 @@ const DepartmentPage = () => {
         />
       </div>
 
-      <div className="w-full max-w-7xl 2xl:max-w-8xl relative z-10">
+      <div className="relative z-10 mb-6 text-center">
         <h1
-          className={`text-4xl font-bold text-center mb-2 ${
+          className={`text-3xl font-bold items-center ${
             darkMode ? "text-white" : "text-gray-800"
           }`}
         >
-          Departments
+          Hello, {displayName}
         </h1>
+      </div>
+
+      <div className="w-full max-w-7xl 2xl:max-w-8xl relative z-10">
         <p
           className={`text-center mb-6 ${
             darkMode ? "text-gray-300" : "text-gray-600"

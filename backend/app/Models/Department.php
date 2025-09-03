@@ -20,6 +20,7 @@ class Department extends Model
         'department_id',
         'name',
         'code',
+        'floor',
         'email',
         'phone',
     ];
