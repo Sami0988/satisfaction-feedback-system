@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const WelcomePage = () => {
   const [name, setName] = useState("");
-  const [setSubmittedName] = useState(null);
+  const [submittedName, setSubmittedName] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ const WelcomePage = () => {
     }
 
     if (trimmedName.length < 2) {
-      setError("Name must be at least 2 characters long.");
+      setError(`Name must be at least 2 characters long.${submittedName}`);
       return;
     }
 
