@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Role extends Model
 {
@@ -26,26 +26,21 @@ class Role extends Model
         'role_id' => 'string',
     ];
 
-    /**
-     * Many-to-many relationship between roles and employees.
-     */
-    public function employees(): BelongsToMany
+    // Auto-generate UUID on create
+    protected static function booted()
     {
-        return $this->belongsToMany(
-            Employee::class,
-            'employee_role', 
-            'role_id',          
-            'employee_id',     
-            'role_id',         
-            'employee_id'      
-        )->using(EmployeeRole::class);
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
     }
 
     /**
-     * One-to-many relationship with the pivot itself.
+     * One-to-many relationship: A Role has many Employees.
      */
-    public function employeeRoles(): HasMany
+    public function employees(): HasMany
     {
-        return $this->hasMany(EmployeeRole::class, 'role_id', 'role_id');
+        return $this->hasMany(Employee::class, 'role_id', 'role_id');
     }
 }

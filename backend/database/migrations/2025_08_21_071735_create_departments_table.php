@@ -18,6 +18,7 @@ return new class extends Migration
 
             $table->String('email', 150)->nullable();
             $table->String('phone', 50)->nullable();
+            $table->string('floor', 50)->nullable();
 
             $table->timestamps();
 

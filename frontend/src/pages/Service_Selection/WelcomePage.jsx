@@ -4,24 +4,30 @@ import { useNavigate } from "react-router-dom";
 const WelcomePage = () => {
   const [name, setName] = useState("");
   const [submittedName, setSubmittedName] = useState(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const handleNext = () => {
-    navigate("/department"); // 👈 your route path here
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      setError(true);
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setError("Name cannot be empty.");
       return;
     }
 
-    setError(false);
-    setSubmittedName(name.trim());
+    if (trimmedName.length < 2) {
+      setError("Name must be at least 2 characters long.");
+      return;
+    }
+
+    setError("");
+    setSubmittedName(trimmedName);
     setName("");
+
+    // Now navigate to the next page
+    navigate("/department", { state: { userName: trimmedName } });
   };
 
   return (
@@ -62,7 +68,7 @@ const WelcomePage = () => {
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if (error) setError(false);
+                if (error) setError(""); // Clear error on change
               }}
               placeholder="Enter your name"
               className={`w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition ${
@@ -70,7 +76,7 @@ const WelcomePage = () => {
                   ? "border-red-500 focus:ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
-              aria-invalid={error}
+              aria-invalid={error ? "true" : "false"}
               aria-describedby="name-error"
             />
             {error && (
@@ -79,22 +85,16 @@ const WelcomePage = () => {
                 className="text-red-600 mt-1 text-sm animate-fade-in"
                 role="alert"
               >
-                Please enter your name.
+                {error}
               </p>
             )}
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
-              onClick={handleNext}
             >
               Next
             </button>
           </form>
-          {submittedName && (
-            <p className="mt-6 text-green-600 text-lg font-medium">
-              Hello, {submittedName}! 👋
-            </p>
-          )}
         </div>
       </div>
     </div>
@@ -102,6 +102,3 @@ const WelcomePage = () => {
 };
 
 export default WelcomePage;
-
-
-    
