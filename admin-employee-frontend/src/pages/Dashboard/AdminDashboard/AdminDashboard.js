@@ -1,126 +1,76 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import { useSelector } from "react-redux";
-import { adminDashboardData } from "../../../data/demodata";
+import RecentActivity from "./RecentActivity";
+import StatsGrid from "./StatsGrid";
+import EmployeeManagement from "./EmployeeManagement";
+import ServicesManagement from "./ServicesManagement";
+import Reports from "./Reports";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
+import ThemeContext from "../../../context/ThemeContext";
+import PasswordSettings from "../../../components/PasswordSettings";
 
 const AdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const { isDarkMode } = useContext(ThemeContext);
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "in-progress":
-        return "bg-yellow-100 text-yellow-800";
-      case "pending":
-        return "bg-red-100 text-red-800";
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "dashboard":
+        return (
+          <>
+            <StatsGrid />
+            <RecentActivity />
+          </>
+        );
+      case "employees":
+        return <EmployeeManagement />;
+      case "services":
+        return <ServicesManagement />;
+      case "reports":
+        return <Reports />;
+      case "settings":
+        return <PasswordSettings />;
       default:
-        return "bg-gray-100 text-gray-800";
+        return (
+          <>
+            <StatsGrid />
+            <RecentActivity />
+          </>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Admin Dashboard
-            </h1>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
-                  Welcome, {user?.name}
-                </p>
-                <p className="text-sm text-indigo-600 capitalize">
-                  {user?.role}
-                </p>
-              </div>
-              <img
-                className="h-10 w-10 rounded-full object-cover"
-                src={
-                  user?.avatar ||
-                  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-                }
-                alt=""
-              />
-            </div>
-          </div>
-        </div>
+    <div
+      className={`min-h-screen flex ${
+        isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
+      }`}
+    >
+      <Sidebar
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        isSidebarOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
+      />
+
+      <div className="flex-1 flex flex-col min-h-screen">
+        <Header
+          user={user}
+          toggleSidebar={toggleSidebar}
+          isSidebarOpen={isSidebarOpen}
+        />
+
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto text-sm">
+          {renderContent()}
+        </main>
       </div>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          {adminDashboardData.stats.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white overflow-hidden shadow rounded-lg"
-            >
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 text-2xl">{stat.icon}</div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {stat.title}
-                      </dt>
-                      <dd>
-                        <div className="text-lg font-medium text-gray-900">
-                          {stat.value}
-                        </div>
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-5 py-3">
-                <div className="text-sm">
-                  <span
-                    className={`font-medium ${
-                      stat.change.includes("+")
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {stat.change}
-                  </span>{" "}
-                  <span className="text-gray-500">from last week</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Recent Activity
-            </h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
-              System activities and events
-            </p>
-          </div>
-          <ul className="divide-y divide-gray-200">
-            {adminDashboardData.recentActivities.map((activity) => (
-              <li key={activity.id} className="px-4 py-4 sm:px-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-indigo-600 truncate">
-                    {activity.description}
-                  </p>
-                  <div className="ml-2 flex-shrink-0 flex">
-                    <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      {activity.time}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </main>
     </div>
   );
 };
