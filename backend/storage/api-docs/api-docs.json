@@ -9,6 +9,94 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user using email or phone",
+                "operationId": "6695976320e11f4f1c09362e37a6a163",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "user@example.com or 0912345678"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout current user",
+                "operationId": "38bde71c7ece853deada2d9147cc7aa7",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/departments": {
             "get": {
                 "tags": [
@@ -794,20 +882,6 @@
                     }
                 }
             }
-        },
-        "/api/users": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get a list of all users",
-                "operationId": "c457726701591d1183b53aa71fc13441",
-                "responses": {
-                    "200": {
-                        "description": "A list of users"
-                    }
-                }
-            }
         }
     },
     "components": {
@@ -920,6 +994,10 @@
     },
     "tags": [
         {
+            "name": "Authentication",
+            "description": "API Endpoints for user login and logout"
+        },
+        {
             "name": "Departments",
             "description": "API Endpoints for managing departments"
         },
@@ -934,10 +1012,6 @@
         {
             "name": "Services",
             "description": "Services"
-        },
-        {
-            "name": "Users",
-            "description": "Users"
         }
     ]
 }
