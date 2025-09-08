@@ -19,7 +19,6 @@ class UserController extends Controller
      */
    public function index(Request $request)
     {
-         $this->authorize('viewAny', User::class);
         $query = User::query();
 
         if ($request->filled('user_type')) {
@@ -57,7 +56,6 @@ class UserController extends Controller
     */
    public function store(Request $request)
     {
-        $this->authorize('create', User::class);
         $data = $request->validate([
             'full_name' => 'required|string|max:150',
             'phone' => 'nullable|string|max:50',
@@ -85,7 +83,6 @@ class UserController extends Controller
     {
        $user = User::findOrFail($user_id);
 
-      $this->authorize('view', $user);
         $query = User::where('user_id', $user_id);
 
         if ($request->boolean('with_roles')) {
@@ -108,7 +105,7 @@ class UserController extends Controller
     {
          $user = User::findOrFail($user_id);
 
-      $this->authorize('update', $user);
+     
         //$user = User::findOrFail($user_id);
 
         $data = $request->validate([
@@ -139,7 +136,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($user_id);
 
-    $this->authorize('delete', $user);
 
     $user->delete();
 

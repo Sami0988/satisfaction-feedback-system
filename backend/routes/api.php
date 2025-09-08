@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthController\EmployeeAuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
 use App\Http\Controllers\ServiceSelector\FeedbackFormController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ServiceSelector\ServiceController;
-
 use App\Http\Controllers\ServiceSelector\EmployeeController;
 
 use App\Http\Controllers\UserController;
@@ -19,15 +20,25 @@ Route::put('/feedback-forms/{id}', [FeedbackFormController::class, 'update']);
 Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']);
 
 
-Route::post('/login', [UserController::class, 'login']);
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [UserController::class, 'logout']);
+// Route::post('/login', [UserController::class, 'login']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/logout', [UserController::class, 'logout']);
 
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
-    Route::get('/users/{user_id}', [UserController::class, 'show']);
-    Route::put('/users/{user_id}', [UserController::class, 'update']);
-    Route::delete('/users/{user_id}', [UserController::class, 'destroy']);
+//     Route::get('/users', [UserController::class, 'index']);
+//     Route::post('/users', [UserController::class, 'store']);
+//     Route::get('/users/{user_id}', [UserController::class, 'show']);
+//     Route::put('/users/{user_id}', [UserController::class, 'update']);
+//     Route::delete('/users/{user_id}', [UserController::class, 'destroy']);
+// });
+
+
+
+    Route::post('/login', [EmployeeAuthController::class, 'login']); // Login
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Employee routes
+    Route::post('/logout', [EmployeeAuthController::class, 'logout']); // Logout
+
 });
 
 
