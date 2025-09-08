@@ -1,6 +1,7 @@
 // components/employees/EmployeeManagement.js
 import React, { useState, useContext } from "react";
 import ThemeContext from "../../../context/ThemeContext";
+import AddEmployee from "./AddEmployee";
 
 const EmployeeManagement = () => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -35,28 +36,7 @@ const EmployeeManagement = () => {
     },
   ]);
 
-  const [newEmployee, setNewEmployee] = useState({
-    name: "",
-    position: "",
-    email: "",
-  });
-  const [isAdding, setIsAdding] = useState(false);
-
-  const handleAddEmployee = () => {
-    if (newEmployee.name && newEmployee.position && newEmployee.email) {
-      const employee = {
-        id: employees.length + 1,
-        name: newEmployee.name,
-        position: newEmployee.position,
-        email: newEmployee.email,
-        status: "Active",
-      };
-
-      setEmployees([...employees, employee]);
-      setNewEmployee({ name: "", position: "", email: "" });
-      setIsAdding(false);
-    }
-  };
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const toggleEmployeeStatus = (id) => {
     setEmployees(
@@ -83,74 +63,34 @@ const EmployeeManagement = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Employee Management</h2>
         <button
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => setIsSheetOpen(true)}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center"
         >
           <span className="mr-2">+</span> Add Employee
         </button>
       </div>
 
-      {isAdding && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            isDarkMode ? "bg-gray-700" : "bg-gray-50"
-          }`}
-        >
-          <h3 className="text-lg font-medium mb-3">Add New Employee</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-            <input
-              type="text"
-              placeholder="Name"
-              value={newEmployee.name}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, name: e.target.value })
-              }
-              className={`p-2 rounded border ${
-                isDarkMode
-                  ? "bg-gray-600 border-gray-500 text-white"
-                  : "bg-white border-gray-300"
-              }`}
-            />
-            <input
-              type="text"
-              placeholder="Position"
-              value={newEmployee.position}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, position: e.target.value })
-              }
-              className={`p-2 rounded border ${
-                isDarkMode
-                  ? "bg-gray-600 border-gray-500 text-white"
-                  : "bg-white border-gray-300"
-              }`}
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={newEmployee.email}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, email: e.target.value })
-              }
-              className={`p-2 rounded border ${
-                isDarkMode
-                  ? "bg-gray-600 border-gray-500 text-white"
-                  : "bg-white border-gray-300"
-              }`}
-            />
-          </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={handleAddEmployee}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setIsAdding(false)}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
+      {isSheetOpen && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setIsSheetOpen(false)}
+          ></div>
+
+          {/* Sheet */}
+          <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 shadow-xl p-8 overflow-y-auto rounded-lg transform transition-transform duration-300 ease-in-out">
+            <div className="flex justify-between items-center mb-5">
+              <button
+                onClick={() => setIsSheetOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* ✅ Form content */}
+            <AddEmployee />
           </div>
         </div>
       )}
