@@ -19,7 +19,9 @@ const PasswordSettings = () => {
         isDarkMode ? "bg-gray-800" : "bg-white"
       } p-4 md:p-6`}
     >
-      <h2 className="text-lg font-bold mb-4">Password Settings</h2>
+      <h2 className={`text-lg font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+        Password Settings
+      </h2>
 
       <form onSubmit={handleSubmit} className="max-w-md">
         <div className="mb-4">
@@ -98,8 +100,10 @@ const PasswordSettings = () => {
           isDarkMode ? "bg-gray-700" : "bg-gray-50"
         }`}
       >
-        <h3 className="font-medium mb-2">Password Requirements</h3>
-        <ul className="list-disc pl-5 space-y-1">
+        <h3 className={`font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+          Password Requirements
+        </h3>
+        <ul className={`list-disc pl-5 space-y-1 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
           <li className="text-xs">Minimum 8 characters</li>
           <li className="text-xs">At least one uppercase letter</li>
           <li className="text-xs">At least one number</li>

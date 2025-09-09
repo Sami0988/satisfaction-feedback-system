@@ -25,6 +25,8 @@ const Login = () => {
   const redirectBasedOnRole = (role) => {
     if (role === "admin") {
       navigate("/admin/dashboard");
+    } else if (role == "superadmin") {
+      navigate("/superadmin/dashboard");
     } else {
       navigate("/employee/dashboard");
     }
@@ -61,6 +63,13 @@ const Login = () => {
         showPassword: false,
       });
       dispatch(loginUser("admin@example.com", "admin123"));
+    } else if (role === "superadmin") {
+      setCredentials({
+        email: "super@gmail.com",
+        password: "12345",
+        showPassword: false,
+      });
+      dispatch(loginUser("super@gmail.com", "12345"));
     } else {
       setCredentials({
         email: "employee@example.com",
