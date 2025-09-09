@@ -20,6 +20,15 @@ export const demoUsers = {
     avatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
   },
+  employee: {
+    id: 3,
+    name: "Super Admin User",
+    email: "super@gmail.com",
+    password: "12345",
+    role: "superadmin",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+  },
 };
 
 // Demo data for admin dashboard

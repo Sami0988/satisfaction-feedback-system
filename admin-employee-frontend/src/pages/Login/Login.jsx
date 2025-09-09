@@ -25,6 +25,8 @@ const Login = () => {
   const redirectBasedOnRole = (role) => {
     if (role === "admin") {
       navigate("/admin/dashboard");
+    } else if (role == "superadmin") {
+      navigate("/superadmin/dashboard");
     } else {
       navigate("/employee/dashboard");
     }
@@ -61,6 +63,13 @@ const Login = () => {
         showPassword: false,
       });
       dispatch(loginUser("admin@example.com", "admin123"));
+    } else if (role === "superadmin") {
+      setCredentials({
+        email: "super@gmail.com",
+        password: "12345",
+        showPassword: false,
+      });
+      dispatch(loginUser("super@gmail.com", "12345"));
     } else {
       setCredentials({
         email: "employee@example.com",
@@ -123,7 +132,7 @@ const Login = () => {
             </div>
           )}
 
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm -space-y-px ">
             <div>
               <label htmlFor="email" className="sr-only">
                 Email address
@@ -134,7 +143,7 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-3 my-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
                 value={credentials.email}
                 onChange={handleChange}
