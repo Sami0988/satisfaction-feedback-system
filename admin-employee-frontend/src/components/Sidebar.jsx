@@ -1,5 +1,8 @@
 import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../redux/slices/AuthSlice";
+import {useDispatch} from "react-redux"
 
 const Sidebar = ({
   activeSection,
@@ -8,6 +11,20 @@ const Sidebar = ({
   toggleSidebar,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
+    const dispatch = useDispatch();
+
+
+  const navigate = useNavigate();
+  //const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    console.log("Logging out...");
+    // Clear redux state
+    //dispatch(logout());
+    dispatch(logoutUser());  // clears auth + localStorage
+    navigate("/");           // go to login page
+
+  };
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "📊" },
@@ -74,6 +91,7 @@ const Sidebar = ({
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-700">
           <button
+            onClick={handleLogout}
             className={`w-full flex items-center p-2 rounded-lg text-sm ${
               isDarkMode
                 ? "text-gray-300 hover:bg-gray-700"

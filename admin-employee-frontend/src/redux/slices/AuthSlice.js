@@ -75,6 +75,11 @@ export const loginUser = (email, password) => (dispatch) => {
   }, 1000);
 };
 
+export const logoutUser = () => (dispatch) => {
+  dispatch(logout()); // calls the reducer
+};
+
+
 export const { loginStart, loginSuccess, loginFailure, logout, clearError } =
   authSlice.actions;
 export default authSlice.reducer;
