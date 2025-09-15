@@ -15,7 +15,7 @@ class AddDepartmentController extends Controller
      * @OA\Post(
      *     path="/api/departments/create",
      *     tags={"Departments"},
-     *     summary="Create a new Department (Super Admin only)",
+     *     summary="Create a new Department with a Department Admin (Super Admin only)",
      *     description="Allows a Super Admin to create a department and assign a Department Admin.",
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
@@ -34,15 +34,29 @@ class AddDepartmentController extends Controller
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Department and Admin created successfully"
+     *         description="Department and Admin created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Department and Admin created successfully."),
+     *             @OA\Property(property="department", type="object"),
+     *             @OA\Property(property="admin", type="object")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=403,
-     *         description="Unauthorized: Only Super Admin can create departments"
+     *         description="Unauthorized: Only Super Admin can create departments",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Unauthorized: Only Super Admin can create departments.")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Validation Error"
+     *         description="Validation Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
      *     )
      * )
      */
@@ -62,7 +76,6 @@ class AddDepartmentController extends Controller
             'floor'             => 'nullable|string|max:50',
             'department_email'  => 'required|email|unique:departments,email',
             'department_phone'  => 'nullable|string|max:20',
-
             'full_name'         => 'required|string|max:255',
             'email'             => 'required|email|unique:users,email',
             'phone'             => 'nullable|string|max:20',
@@ -101,4 +114,5 @@ class AddDepartmentController extends Controller
             'admin'      => $admin
         ], 201);
     }
+    
 }
