@@ -882,6 +882,86 @@
                     }
                 }
             }
+        },
+        "/api/departments/create": {
+            "post": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Create a new Department (Super Admin only)",
+                "description": "Allows a Super Admin to create a department and assign a Department Admin.",
+                "operationId": "eb57c4fd9b88ad061c63d3279dbb5089",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "department_name",
+                                    "department_email",
+                                    "full_name",
+                                    "email",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "department_name": {
+                                        "type": "string",
+                                        "example": "IT Department"
+                                    },
+                                    "floor": {
+                                        "type": "string",
+                                        "example": "2nd Floor"
+                                    },
+                                    "department_email": {
+                                        "type": "string",
+                                        "example": "it@company.com"
+                                    },
+                                    "department_phone": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john.doe@company.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "987654321"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "Department Admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Department and Admin created successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized: Only Super Admin can create departments"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -999,7 +1079,7 @@
         },
         {
             "name": "Departments",
-            "description": "API Endpoints for managing departments"
+            "description": "API Endpoints for Super Admin Department Management"
         },
         {
             "name": "Employees",
