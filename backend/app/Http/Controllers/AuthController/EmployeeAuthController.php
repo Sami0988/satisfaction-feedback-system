@@ -55,8 +55,6 @@ class EmployeeAuthController extends Controller
                     ->orWhere('phone', $request->username)
                     ->first();
 
-        print_r($user); // Debugging line to check the retrieved user   
-
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }

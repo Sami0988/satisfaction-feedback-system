@@ -7,11 +7,13 @@ use App\Http\Controllers\ServiceSelector\FeedbackFormController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ServiceSelector\ServiceController;
 use App\Http\Controllers\ServiceSelector\EmployeeController;
+use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 
 use App\Http\Controllers\UserController;
 
 
 use App\Http\Controllers\Controller;
+// use App\Http\Controllers\AddDepartmentController;
 
 Route::get('/feedback-forms', [FeedbackFormController::class, 'index']);
 Route::post('/feedback-forms', [FeedbackFormController::class, 'store']);
@@ -55,3 +57,8 @@ Route::prefix('employees')->group(function () {
     Route::delete('/{id}', [EmployeeController::class, 'destroy']); // Delete
 });
 
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/departments/create', [AddDepartmentController::class, 'store']);
+});
