@@ -888,7 +888,7 @@
                 "tags": [
                     "Departments"
                 ],
-                "summary": "Create a new Department (Super Admin only)",
+                "summary": "Create a new Department with a Department Admin (Super Admin only)",
                 "description": "Allows a Super Admin to create a department and assign a Department Admin.",
                 "operationId": "eb57c4fd9b88ad061c63d3279dbb5089",
                 "requestBody": {
@@ -944,16 +944,69 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Department and Admin created successfully"
+                        "description": "Department and Admin created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department and Admin created successfully."
+                                        },
+                                        "department": {
+                                            "type": "object"
+                                        },
+                                        "admin": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized: Only Super Admin can create departments"
+                        "description": "Unauthorized: Only Super Admin can create departments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized: Only Super Admin can create departments."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation Error"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -961,6 +1014,58 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/api/super-admin/create": {
+            "post": {
+                "tags": [
+                    "SuperAdmin"
+                ],
+                "summary": "Create a Super Admin",
+                "description": "Adds a Super Admin to the employees table",
+                "operationId": "5e3b98861d5bc557a2b5a570d41a3b82",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "full_name",
+                                    "email",
+                                    "phone",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john@company.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "StrongPass123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Super Admin created successfully"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                }
             }
         }
     },
@@ -1069,6 +1174,12 @@
             "bearerAuth": {
                 "type": "http",
                 "scheme": "bearer"
+            },
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
             }
         }
     },
@@ -1079,7 +1190,7 @@
         },
         {
             "name": "Departments",
-            "description": "API Endpoints for Super Admin Department Management"
+            "description": "API Endpoints for managing departments"
         },
         {
             "name": "Employees",
@@ -1092,6 +1203,10 @@
         {
             "name": "Services",
             "description": "Services"
+        },
+        {
+            "name": "SuperAdmin",
+            "description": "SuperAdmin"
         }
     ]
 }

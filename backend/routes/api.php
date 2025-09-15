@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AuthController\EmployeeAuthController;
+use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
 use App\Http\Controllers\ServiceSelector\FeedbackFormController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ServiceSelector\ServiceController;
 use App\Http\Controllers\ServiceSelector\EmployeeController;
-use App\Http\Controllers\SuperAdminController\AddDepartmentController;
+use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
+
+
 
 use App\Http\Controllers\UserController;
 
@@ -35,13 +36,8 @@ Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']
 
 
 
-    Route::post('/login', [EmployeeAuthController::class, 'login']); // Login
-
-Route::middleware('auth:sanctum')->group(function () {
-    // Employee routes
-    Route::post('/logout', [EmployeeAuthController::class, 'logout']); // Logout
-
-});
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
 
@@ -59,6 +55,12 @@ Route::prefix('employees')->group(function () {
 
 
 
+
+
+
+Route::post('/super-admin/create', [AddSuperAdminController::class, 'store']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/departments/create', [AddDepartmentController::class, 'store']);
 });
+
