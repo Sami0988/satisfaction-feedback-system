@@ -16,9 +16,15 @@ const Login = () => {
   );
 
   // Redirect if already authenticated
+  // inside useEffect
   useEffect(() => {
     if (isAuthenticated && user) {
-      redirectBasedOnRole(user.role);
+      if (user.password === "1234") {
+        // 👇 force redirect to password change page
+        navigate("/password-settings");
+      } else {
+        redirectBasedOnRole(user.role);
+      }
     }
   }, [isAuthenticated, user, navigate]);
 

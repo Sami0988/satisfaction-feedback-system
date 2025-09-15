@@ -11,14 +11,14 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
     adminFullName: "",
     adminEmail: "",
     adminPhone: "",
-    adminRole: "Department Admin"
+    adminRole: "Department Admin",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -32,21 +32,29 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div 
+      <div
         className={`w-full max-w-2xl rounded-lg shadow-xl max-h-[90vh] overflow-y-auto ${
           isDarkMode ? "bg-gray-800" : "bg-white"
         }`}
       >
-        <div className={`p-4 border-b ${
-          isDarkMode ? "border-gray-700" : "border-gray-200"
-        } flex justify-between items-center`}>
-          <h2 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+        <div
+          className={`p-4 border-b ${
+            isDarkMode ? "border-gray-700" : "border-gray-200"
+          } flex justify-between items-center`}
+        >
+          <h2
+            className={`text-xl font-bold ${
+              isDarkMode ? "text-white" : "text-gray-800"
+            }`}
+          >
             Add New Department
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className={`p-1 rounded-full ${
-              isDarkMode ? "hover:bg-gray-700 text-white" : "hover:bg-gray-200 text-gray-600"
+              isDarkMode
+                ? "hover:bg-gray-700 text-white"
+                : "hover:bg-gray-200 text-gray-600"
             }`}
           >
             ✕
@@ -55,13 +63,21 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
 
         <form onSubmit={handleSubmit} className="p-6">
           <div className="mb-6">
-            <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+            <h3
+              className={`text-lg font-medium mb-4 ${
+                isDarkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
               Department Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Department Name *
                 </label>
                 <input
@@ -79,7 +95,11 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Floor
                 </label>
                 <input
@@ -96,7 +116,11 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Department Email *
                 </label>
                 <input
@@ -114,7 +138,11 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Department Phone
                 </label>
                 <input
@@ -133,13 +161,21 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
           </div>
 
           <div className="mb-6">
-            <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+            <h3
+              className={`text-lg font-medium mb-4 ${
+                isDarkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
               Department Admin Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Full Name *
                 </label>
                 <input
@@ -157,7 +193,11 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Email *
                 </label>
                 <input
@@ -175,7 +215,11 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Phone
                 </label>
                 <input
@@ -192,36 +236,39 @@ const AddDepartmentForm = ({ isOpen, onClose, onSave }) => {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                <label
+                  className={`block text-sm font-medium mb-1 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Role
                 </label>
-                <select
+                <input
+                  type="text"
                   name="adminRole"
-                  value={formData.adminRole}
-                  onChange={handleChange}
+                  value="Admin"
+                  readOnly
                   className={`w-full p-2 rounded border ${
                     isDarkMode
                       ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300"
+                      : "bg-gray-100 border-gray-300 text-gray-700"
                   }`}
-                >
-                  <option value="Department Admin">Department Admin</option>
-                  <option value="Department Employee">Department Employee</option>
-                 
-                </select>
+                />
               </div>
             </div>
           </div>
 
-          <div className={`p-4 border-t ${
-            isDarkMode ? "border-gray-700" : "border-gray-200"
-          } flex justify-end space-x-3`}>
+          <div
+            className={`p-4 border-t ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            } flex justify-end space-x-3`}
+          >
             <button
               type="button"
               onClick={onClose}
               className={`px-4 py-2 rounded ${
-                isDarkMode 
-                  ? "bg-gray-700 text-white hover:bg-gray-600" 
+                isDarkMode
+                  ? "bg-gray-700 text-white hover:bg-gray-600"
                   : "bg-gray-200 text-gray-800 hover:bg-gray-300"
               }`}
             >
