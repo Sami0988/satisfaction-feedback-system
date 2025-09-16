@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { demoUsers } from "../../data/demodata";
+import { login as loginApi, logout as logoutApi } from "../../api/AutApi";
 
 const getInitialState = () => {
   const storedUser = localStorage.getItem("user");
@@ -30,9 +30,10 @@ const authSlice = createSlice({
     loginSuccess: (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
-      state.user = action.payload;
+      state.user = action.payload.user;
       state.error = null;
-      localStorage.setItem("user", JSON.stringify(action.payload));
+      localStorage.setItem("user", JSON.stringify(action.payload.user));
+      localStorage.setItem("token", action.payload.token); // store token
     },
     loginFailure: (state, action) => {
       state.loading = false;
@@ -44,7 +45,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.error = null;
+      state.loading = false;
       localStorage.removeItem("user");
+      localStorage.removeItem("token");
     },
     clearError: (state) => {
       state.error = null;
@@ -52,34 +55,30 @@ const authSlice = createSlice({
   },
 });
 
-// Async action for demo login
-export const loginUser = (email, password) => (dispatch) => {
+// Thunks (async actions)
+export const loginUser = (username, password) => async (dispatch) => {
   dispatch(loginStart());
-
-  // Simulate API call delay
-  setTimeout(() => {
-    // Check against demo users
-    if (
-      email === demoUsers.admin.email &&
-      password === demoUsers.admin.password
-    ) {
-      dispatch(loginSuccess(demoUsers.admin));
-    } else if (
-      email === demoUsers.employee.email &&
-      password === demoUsers.employee.password
-    ) {
-      dispatch(loginSuccess(demoUsers.employee));
-    } else {
-      dispatch(loginFailure("Invalid email or password"));
-    }
-  }, 1000);
+  try {
+    const data = await loginApi(username, password);
+    dispatch(loginSuccess(data));
+    console.log("Login API response:", data);
+  } catch (error) {
+    dispatch(
+      loginFailure(error.response?.data?.message || "Login failed. Try again.")
+    );
+  }
 };
 
-export const logoutUser = () => (dispatch) => {
-  dispatch(logout()); // calls the reducer
+export const logoutUser = () => async (dispatch) => {
+  try {
+    await logoutApi();
+  } catch (error) {
+    console.warn("Logout API failed, clearing local state anyway.");
+  }
+  dispatch(logout());
 };
-
 
 export const { loginStart, loginSuccess, loginFailure, logout, clearError } =
   authSlice.actions;
+
 export default authSlice.reducer;

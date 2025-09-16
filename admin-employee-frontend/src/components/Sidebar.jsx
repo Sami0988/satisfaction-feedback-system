@@ -3,7 +3,6 @@ import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../redux/slices/AuthSlice";
 import { useSelector, useDispatch } from "react-redux";
-
 const Sidebar = ({
   activeSection,
   setActiveSection,
@@ -12,19 +11,16 @@ const Sidebar = ({
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const dispatch = useDispatch();
-
-  // 👇 get the logged-in user from Redux
   const user = useSelector((state) => state.auth.user);
-
   const navigate = useNavigate();
-  //const dispatch = useDispatch();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     console.log("Logging out...");
-    dispatch(logoutUser());
-    navigate("/");
+    await dispatch(logoutUser()); 
+    navigate("/"); // redirect to login/home
   };
 
+  // Base menu items
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "📊" },
     { id: "employees", label: "Employees", icon: "👥" },
@@ -33,14 +29,33 @@ const Sidebar = ({
     { id: "settings", label: "Password Settings", icon: "⚙️" },
   ];
 
-  const visibleMenuItems =
-    user?.role === "superadmin"
-      ? menuItems.filter((item) => item.id !== "services")
-      : menuItems;
+  // Adjust menu items based on role
+  const visibleMenuItems = menuItems
+    .map((item) => {
+      if (item.id === "employees" && user?.role === "Super Admin") {
+        // Rename Employees to Department for Super Admin
+        return { ...item, label: "Department" };
+      }
+
+      // Add Feedback item for Admin and Super Admin
+      if (
+        item.id === "reports" &&
+        ["Super Admin", "Admin"].includes(user?.role)
+      ) {
+        return [item, { id: "feedback", label: "Feedback", icon: "💬" }];
+      }
+
+      return item;
+    })
+    .flat() // flatten nested arrays
+    .filter((item) => {
+      // Hide services for Super Admin
+      if (user?.role === "Super Admin" && item.id === "services") return false;
+      return true;
+    });
 
   return (
     <>
-      {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"

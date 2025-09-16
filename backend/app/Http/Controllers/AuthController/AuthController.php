@@ -28,28 +28,41 @@ class AuthController extends Controller
      *     @OA\Response(response=401, description="Invalid credentials")
      * )
      */
-    public function login(Request $request)
-    {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
+   public function login(Request $request)
+{
+    $request->validate([
+        'username' => 'required|string',
+        'password' => 'required|string',
+    ]);
 
-        $user = Employee::where('email', $request->username)
-                        ->orWhere('phone', $request->username)
-                        ->first();
+    $user = Employee::where('email', $request->username)
+                    ->orWhere('phone', $request->username)
+                    ->with('role') // 👈 eager load role
+                    ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => $user
-        ], 200);
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'token' => $token,
+        'user'  => [
+            'employee_id'   => $user->employee_id,
+            'full_name'     => $user->full_name,
+            'email'         => $user->email,
+            'phone'         => $user->phone,
+            'role'          => $user->role->name, 
+            'department_id' => $user->department_id,
+            'service_id'    => $user->service_id,
+            'hire_date'     => $user->hire_date,
+            'active'        => $user->active,
+            'created_at'    => $user->created_at,
+            'updated_at'    => $user->updated_at,
+        ],
+    ], 200);
+}
 
     /**
      * @OA\Post(

@@ -8,7 +8,7 @@ import EmployeeManagement from "./EmployeeManagement";
 import ServiceManagement from "./ServiceManagement";
 import Reports from "./Reports";
 
-const AdminDashboard = () => {
+const SuperAdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isDarkMode } = useContext(ThemeContext);
@@ -331,4 +331,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default SuperAdminDashboard;
