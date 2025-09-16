@@ -3,32 +3,30 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 /**
- * ProtectedRoute component that checks authentication and user role
- * @param {Object} props - Component props
- * @param {ReactNode} props.children - The child components to render if authenticated
- * @param {string} [props.requiredRole] - Optional role required to access the route
- * @returns {ReactNode} Either the children components or a redirect to login
+ * ProtectedRoute ensures the user is authenticated and optionally has a required role.
+ *
+ * @param {ReactNode} children - Components to render if allowed
+ * @param {string} [requiredRole] - Optional role required to access this route
  */
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
+  // Not authenticated → redirect to login
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // If role is required but user doesn't have it, redirect to appropriate dashboard
-  if (requiredRole && user?.role !== requiredRole) {
-    // Redirect based on actual user role
-    return (
-      <Navigate
-        to={user?.role === "admin" ? "/admin/dashboard" : "/employee/dashboard"}
-        replace
-      />
-    );
+  // Role check: if requiredRole is set and user doesn't match → redirect to their dashboard
+  if (requiredRole && user.role !== requiredRole) {
+    let redirectPath = "/employee/dashboard"; // default
+
+    if (user.role === "Super Admin") redirectPath = "/superadmin/dashboard";
+    else if (user.role === "Admin") redirectPath = "/admin/dashboard";
+
+    return <Navigate to={redirectPath} replace />;
   }
 
-  // If authenticated and has required role (if any), render children
+  // Authenticated & authorized → render children
   return children;
 };
 

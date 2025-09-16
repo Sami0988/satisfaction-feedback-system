@@ -5,7 +5,8 @@ namespace App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
-use App\Models\User;
+use App\Models\Employee;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -61,58 +62,210 @@ class AddDepartmentController extends Controller
      * )
      */
     public function store(Request $request)
+{
+    // Only Super Admins can create
+    if ($request->user()->role->name !== 'Super Admin') {
+        return response()->json([
+            'status'       => 'error',
+            'current_role' => $request->user()->role,
+            'message'      => 'Unauthorized: Only Super Admin can create departments.'
+        ], 403);
+    }
+
+    // Validate input based on JSON keys
+    $validator = Validator::make($request->all(), [
+        'departmentName'  => 'required|string|max:255',
+        'floor'           => 'nullable|string|max:50',
+        'departmentEmail' => 'required|email|unique:departments,email',
+        'departmentPhone' => 'nullable|string|max:20',
+        'adminFullName'   => 'required|string|max:255',
+        'adminEmail'      => 'required|email|unique:employees,email',
+        'adminPhone'      => 'nullable|string|max:20',
+        'adminRole'       => 'required|string|in:Department Admin',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => 'error',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    // Create Department
+    $department = Department::create([
+        'name'  => $request->departmentName,
+        'floor' => $request->floor,
+        'email' => $request->departmentEmail,
+        'phone' => $request->departmentPhone,
+    ]);
+
+    // Create Role for Department Admin
+    $role = Role::firstOrCreate(
+        ['name' => 'Department Admin'], // Check by name
+        ['description' => 'Admin for department'] // Only used if creating new
+    );
+
+    // Create Employee
+    $employee = Employee::create([
+        'full_name'     => $request->adminFullName,
+        'email'         => $request->adminEmail,
+        'phone'         => $request->adminPhone,
+        'password'      => Hash::make('password123'), // default password
+        'department_id' => $department->department_id,
+        'role_id'       => $role->role_id,
+        'active'        => true,
+    ]);
+
+    return response()->json([
+        'status'     => 'success',
+        'message'    => 'Department, Role, and Admin created successfully.',
+        'department' => $department,
+        'role'       => $role,
+        'employee'   => $employee
+    ], 201);
+}
+
+public function index(Request $request)
+{
+    // Only Super Admin can fetch employees
+    if ($request->user()->role->name !== 'Super Admin') {
+        return response()->json([
+            'status'  => 'error',
+            'current_role' => $request->user()->role,
+            'message' => 'Unauthorized: Only Super Admin can view employees.'
+        ], 403);
+    }
+
+    // Optional filter by department_id
+    $query = Employee::query();
+
+    if ($request->has('department_id')) {
+        $query->where('department_id', $request->department_id);
+    }
+
+    // Eager load department and role
+    $employees = $query->with(['department', 'role'])->get();
+
+    // Exclude Super Admin
+    $employees = $employees->filter(function ($emp) {
+        return $emp->role->name !== 'Super Admin';
+    });
+
+    // Map to desired response format
+    $response = $employees->map(function ($emp) {
+        return [
+            'id'              => $emp->employee_id,
+            'adminEmail'      => $emp->email,
+            'adminFullName'   => $emp->full_name,
+            'adminPhone'      => $emp->phone,
+            'adminRole'       => $emp->role->name ?? null,
+            'departmentEmail' => $emp->department->email ?? null,
+            'departmentName'  => $emp->department->name ?? null,
+            'departmentPhone' => $emp->department->phone ?? null,
+            'floor'           => $emp->department->floor ?? null,
+            'status'          => $emp->active ? 'Active' : 'Inactive',
+        ];
+    });
+
+    return response()->json([
+        'status'    => 'success',
+        'employees' => $employees->values() 
+    ]);
+}
+
+public function putUpdate(Request $request, $id)
+{
+    // Find the department
+    $department = Department::findOrFail($id);
+
+    // Find the admin/employee assigned to this department
+    $employee = Employee::where('department_id', $department->department_id)->first();
+
+    // Validate input
+    $validator = Validator::make($request->all(), [
+        // Department fields
+        'departmentName'  => 'required|string|max:255',
+        'floor'           => 'nullable|string|max:50',
+        'departmentEmail' => 'required|email|unique:departments,email,' . $department->department_id . ',department_id',
+        'departmentPhone' => 'nullable|string|max:20',
+
+        // Employee fields (only validate if employee exists)
+        'full_name' => $employee ? 'sometimes|required|string|max:255' : 'nullable',
+        'email'     => $employee 
+                        ? 'sometimes|required|email|unique:employees,email,' . $employee->employee_id . ',employee_id'
+                        : 'nullable',
+        'phone'     => 'sometimes|nullable|string|max:20',
+        'password'  => 'sometimes|nullable|string|min:6',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => 'error',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    // Update department
+    $department->update([
+        'name'  => $request->departmentName,
+        'floor' => $request->floor,
+        'email' => $request->departmentEmail,
+        'phone' => $request->departmentPhone,
+    ]);
+
+    // Update employee if exists
+    if ($employee) {
+        $employee->update([
+            'full_name' => $request->full_name ?? $employee->full_name,
+            'email'     => $request->email ?? $employee->email,
+            'phone'     => $request->phone ?? $employee->phone,
+            'password'  => $request->password ? bcrypt($request->password) : $employee->password,
+        ]);
+    }
+
+    return response()->json([
+        'status'     => 'success',
+        'message'    => 'Department and admin updated successfully.',
+        'department' => $department,
+        'admin'      => $employee
+    ]);
+}    /**
+     * PATCH - Partial update (only given fields)
+     */
+    public function patchUpdate(Request $request, $id)
     {
-        // ✅ Only Super Admins can create
-        if ($request->user()->role !== 'Super Admin') {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Unauthorized: Only Super Admin can create departments.'
-            ], 403);
-        }
+        $department = Department::findOrFail($id);
 
-        // ✅ Validate input
-        $validator = Validator::make($request->all(), [
-            'department_name'   => 'required|string|max:255',
-            'floor'             => 'nullable|string|max:50',
-            'department_email'  => 'required|email|unique:departments,email',
-            'department_phone'  => 'nullable|string|max:20',
-            'full_name'         => 'required|string|max:255',
-            'email'             => 'required|email|unique:users,email',
-            'phone'             => 'nullable|string|max:20',
-            'role'              => 'required|string|in:Department Admin',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status'  => 'error',
-                'errors'  => $validator->errors()
-            ], 422);
-        }
-
-        // ✅ Create Department
-        $department = Department::create([
-            'name'   => $request->department_name,
-            'floor'  => $request->floor,
-            'email'  => $request->department_email,
-            'phone'  => $request->department_phone,
-        ]);
-
-        // ✅ Create Department Admin
-        $admin = User::create([
-            'name'          => $request->full_name,
-            'email'         => $request->email,
-            'phone'         => $request->phone,
-            'role'          => $request->role,
-            'department_id' => $department->id,
-            'password'      => Hash::make('password123'), // default password
+        $department->update([
+            'name'  => $request->departmentName ?? $department->name,
+            'floor' => $request->floor ?? $department->floor,
+            'email' => $request->departmentEmail ?? $department->email,
+            'phone' => $request->departmentPhone ?? $department->phone,
         ]);
 
         return response()->json([
-            'status'     => 'success',
-            'message'    => 'Department and Admin created successfully.',
-            'department' => $department,
-            'admin'      => $admin
-        ], 201);
+            'status'  => 'success',
+            'message' => 'Department partially updated successfully.',
+            'department' => $department
+        ]);
     }
-    
+
+    /**
+     * DELETE - Remove department
+     */
+    public function destroy($id)
+    {
+        $department = Department::findOrFail($id);
+        $department->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Department deleted successfully.'
+        ]);
+    }
+
+
+
+ 
+
 }
