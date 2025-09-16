@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser, clearError } from "../../redux/slices/AuthSlice";
+import { getDashboardPath } from "../../utils/redirect";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -19,27 +20,13 @@ const Login = () => {
   // Redirect when logged in
   useEffect(() => {
     if (isAuthenticated && user) {
-      console.log("Authenticated user:", user);
       if (user.force_password_change) {
         navigate("/password-settings");
       } else {
-        redirectBasedOnRole(user.role?.name || user.role);
+        navigate(getDashboardPath(user));
       }
     }
   }, [isAuthenticated, user, navigate]);
-
-  const redirectBasedOnRole = (role) => {
-    switch (role) {
-      case "Super Admin":
-        navigate("/superadmin/dashboard");
-        break;
-      case "admin":
-        navigate("/admin/dashboard");
-        break;
-      default:
-        navigate("/employee/dashboard");
-    }
-  };
 
   const handleChange = (e) => {
     setCredentials({

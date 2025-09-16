@@ -61,6 +61,7 @@ export const loginUser = (username, password) => async (dispatch) => {
   try {
     const data = await loginApi(username, password);
     dispatch(loginSuccess(data));
+    console.log("Login API response:", data);
   } catch (error) {
     dispatch(
       loginFailure(error.response?.data?.message || "Login failed. Try again.")

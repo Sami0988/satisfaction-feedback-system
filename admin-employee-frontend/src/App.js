@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,37 +9,33 @@ import { useSelector } from "react-redux";
 import Login from "./pages/Login/Login";
 import AdminDashboard from "./pages/Dashboard/AdminDashboard/AdminDashboard";
 import EmployeeDashboard from "./pages/Dashboard/EmployeeDashboard/EmployeeDashboard";
-import SuperAdminDashboard from "./pages/Dashboard/SuperAdminDashboard/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeProvider } from "./context/ThemeContext";
 // 👇 import your password settings page
 import PasswordSettings from "./components/deafultPasswordChanger";
+import { getDashboardPath } from "./utils/redirect";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+
+import SuperAdminDashboard from "./pages/Dashboard/SuperAdminDashboard/SuperAdminDashboard ";
 
 function App() {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  // ✅ Decide redirect path
-  const getDashboardPath = (user) => {
-    // 🚨 force password update if default password is still used
-    if (user?.password === "1234") {
-      return "/password-settings";
-    }
-
-    // otherwise, send to dashboard by role
-    switch (user?.role) {
-      case "superadmin":
-        return "/superadmin/dashboard";
-      case "admin":
-        return "/admin/dashboard";
-      case "employee":
-        return "/employee/dashboard";
-      default:
-        return "/";
-    }
-  };
-
   return (
     <ThemeProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <Router>
         <div className="App">
           <Routes>
@@ -48,7 +44,7 @@ function App() {
               path="/"
               element={
                 isAuthenticated ? (
-                  <Navigate to={getDashboardPath(user)} replace />
+                  <Navigate to={getDashboardPath(user) || "/"} replace />
                 ) : (
                   <Login />
                 )
@@ -59,7 +55,7 @@ function App() {
             <Route
               path="/superadmin/dashboard"
               element={
-                <ProtectedRoute requiredRole="superadmin">
+                <ProtectedRoute requiredRole="Super Admin">
                   <SuperAdminDashboard />
                 </ProtectedRoute>
               }
@@ -69,7 +65,7 @@ function App() {
             <Route
               path="/admin/dashboard"
               element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredRole="Department Admin">
                   <AdminDashboard />
                 </ProtectedRoute>
               }

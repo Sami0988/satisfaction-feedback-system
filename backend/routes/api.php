@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ServiceSelector\ServiceController;
 use App\Http\Controllers\ServiceSelector\EmployeeController;
 use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
+use App\Http\Controllers\SuperAdminController\AddDepartmentController;
+
 
 
 
@@ -62,5 +64,16 @@ Route::post('/super-admin/create', [AddSuperAdminController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/departments/create', [AddDepartmentController::class, 'store']);
+    Route::get('/departments', [AddDepartmentController::class, 'index']);
+    // full update
+Route::put('/departments/{id}', [AddDepartmentController::class, 'putUpdate']);
+
+// partial update
+Route::patch('/departments/{id}', [AddDepartmentController::class, 'patchUpdate']);
+
+// delete
+Route::delete('/departments/{id}', [AddDepartmentController::class, 'destroy']);
 });
+
+
 
