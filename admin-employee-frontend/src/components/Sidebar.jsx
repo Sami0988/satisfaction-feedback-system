@@ -2,7 +2,7 @@ import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../redux/slices/AuthSlice";
-import {useDispatch} from "react-redux"
+import { useSelector, useDispatch } from "react-redux";
 
 const Sidebar = ({
   activeSection,
@@ -11,19 +11,18 @@ const Sidebar = ({
   toggleSidebar,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
+  // 👇 get the logged-in user from Redux
+  const user = useSelector((state) => state.auth.user);
 
   const navigate = useNavigate();
   //const dispatch = useDispatch();
 
   const handleLogout = () => {
     console.log("Logging out...");
-    // Clear redux state
-    //dispatch(logout());
-    dispatch(logoutUser());  // clears auth + localStorage
-    navigate("/");           // go to login page
-
+    dispatch(logoutUser());
+    navigate("/");
   };
 
   const menuItems = [
@@ -33,6 +32,11 @@ const Sidebar = ({
     { id: "reports", label: "Reports", icon: "📈" },
     { id: "settings", label: "Password Settings", icon: "⚙️" },
   ];
+
+  const visibleMenuItems =
+    user?.role === "superadmin"
+      ? menuItems.filter((item) => item.id !== "services")
+      : menuItems;
 
   return (
     <>
@@ -66,7 +70,7 @@ const Sidebar = ({
 
         <nav className="p-4">
           <ul className="space-y-1">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => {

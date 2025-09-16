@@ -12,13 +12,21 @@ import EmployeeDashboard from "./pages/Dashboard/EmployeeDashboard/EmployeeDashb
 import SuperAdminDashboard from "./pages/Dashboard/SuperAdminDashboard/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeProvider } from "./context/ThemeContext";
+// 👇 import your password settings page
+import PasswordSettings from "./components/deafultPasswordChanger";
 
 function App() {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  // ✅ Decide redirect path based on role
-  const getDashboardPath = (role) => {
-    switch (role) {
+  // ✅ Decide redirect path
+  const getDashboardPath = (user) => {
+    // 🚨 force password update if default password is still used
+    if (user?.password === "1234") {
+      return "/password-settings";
+    }
+
+    // otherwise, send to dashboard by role
+    switch (user?.role) {
       case "superadmin":
         return "/superadmin/dashboard";
       case "admin":
@@ -35,12 +43,12 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Root → Login */}
+            {/* Root → Login or Redirect */}
             <Route
               path="/"
               element={
                 isAuthenticated ? (
-                  <Navigate to={getDashboardPath(user.role)} replace />
+                  <Navigate to={getDashboardPath(user)} replace />
                 ) : (
                   <Login />
                 )
@@ -73,6 +81,16 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="employee">
                   <EmployeeDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ✅ Password Settings Page */}
+            <Route
+              path="/password-settings"
+              element={
+                <ProtectedRoute>
+                  <PasswordSettings />
                 </ProtectedRoute>
               }
             />
