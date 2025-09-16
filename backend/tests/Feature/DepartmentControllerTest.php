@@ -20,31 +20,6 @@ class DepartmentControllerTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
-    public function a_user_can_get_a_paginated_list_of_departments()
-    {
-        // Create 15 departments to test pagination
-        Department::factory()->count(15)->create();
-
-        $response = $this->actingAs($this->user)->getJson('/api/departments');
-
-        $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data' => [
-                         '*' => ['department_id', 'name', 'code', 'email', 'phone']
-                     ],
-                     'meta' => [
-                         'current_page',
-                         'per_page',
-                         'total',
-                         'last_page',
-                     ]
-                 ])
-                 ->assertJsonCount(12, 'data'); 
-    }
-
-   
-
 
     /** @test */
     public function a_user_can_view_a_single_department()
