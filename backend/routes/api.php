@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\AuthController\PasswordController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthController\EmployeeAuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
@@ -62,3 +62,5 @@ Route::prefix('employees')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/departments/create', [AddDepartmentController::class, 'store']);
 });
+
+Route::middleware('auth:sanctum')->post('/password/update', [PasswordController::class, 'update']);
