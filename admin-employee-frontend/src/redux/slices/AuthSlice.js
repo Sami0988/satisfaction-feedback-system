@@ -1,19 +1,25 @@
+// admin-employee-frontend/src/redux/slices/AuthSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 import { login as loginApi, logout as logoutApi } from "../../api/AutApi";
 
+// Safe initial state
 const getInitialState = () => {
   const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    return {
-      isAuthenticated: true,
-      user: JSON.parse(storedUser),
-      loading: false,
-      error: null,
-    };
+  let parsedUser = null;
+
+  try {
+    // Only parse if storedUser exists and is valid
+    if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
+      parsedUser = JSON.parse(storedUser);
+    }
+  } catch (err) {
+    console.warn("Invalid JSON in localStorage for 'user', clearing it.", err);
+    localStorage.removeItem("user");
   }
+
   return {
-    isAuthenticated: false,
-    user: null,
+    isAuthenticated: !!parsedUser,
+    user: parsedUser || null,
     loading: false,
     error: null,
   };
@@ -32,8 +38,14 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.error = null;
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
-      localStorage.setItem("token", action.payload.token); // store token
+
+      // Store only valid user and token
+      if (action.payload.user && typeof action.payload.user === "object") {
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      }
+      if (action.payload.token && typeof action.payload.token === "string") {
+        localStorage.setItem("token", action.payload.token);
+      }
     },
     loginFailure: (state, action) => {
       state.loading = false;
@@ -60,8 +72,14 @@ export const loginUser = (username, password) => async (dispatch) => {
   dispatch(loginStart());
   try {
     const data = await loginApi(username, password);
-    dispatch(loginSuccess(data));
-    console.log("Login API response:", data);
+
+    // Only dispatch success if valid data
+    if (data?.user && data?.token) {
+      dispatch(loginSuccess(data));
+      console.log("Login API response:", data);
+    } else {
+      dispatch(loginFailure("Invalid login response from server"));
+    }
   } catch (error) {
     dispatch(
       loginFailure(error.response?.data?.message || "Login failed. Try again.")

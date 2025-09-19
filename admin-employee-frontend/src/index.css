@@ -7,15 +7,15 @@
   .text-sm {
     font-size: 0.875rem;
   }
-  
+
   .text-xs {
     font-size: 0.75rem;
   }
-  
+
   .text-lg {
     font-size: 1.125rem;
   }
-  
+
   .text-xl {
     font-size: 1.25rem;
   }
@@ -24,4 +24,42 @@
 /* Smooth transitions for sidebar */
 .sidebar-transition {
   transition: transform 0.3s ease-in-out;
+}
+
+/* Optional: Add smooth transitions for dark mode */
+* {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+@keyframes chase-spinner {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-chase-spinner {
+  animation: chase-spinner 1.2s linear infinite;
+}
+
+@keyframes flip {
+  0% {
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: perspective(120px) rotateX(-180deg) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(120px) rotateX(-180deg) rotateY(-180deg);
+  }
+}
+
+.animate-flip {
+  animation: flip 1.2s infinite ease-in-out;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
 }

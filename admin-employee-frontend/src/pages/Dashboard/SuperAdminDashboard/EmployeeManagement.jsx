@@ -35,22 +35,20 @@ const EmployeeManagement = () => {
     if (error) toast.error(error);
   }, [error]);
 
-  // Filter departments based on search term
+  // Filter departments based on search term - FIXED
   const filteredDepartments = useMemo(() => {
     if (!departments) return [];
 
     return departments.filter(
       (dept) =>
-        dept.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dept.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dept.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dept.department?.name
+        dept.adminFullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.adminEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.adminPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.departmentEmail
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        dept.department?.email
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        dept.department?.floor?.toString().includes(searchTerm)
+        dept.floor?.toString().includes(searchTerm)
     );
   }, [departments, searchTerm]);
 
@@ -67,7 +65,6 @@ const EmployeeManagement = () => {
     try {
       await dispatch(createDepartment(departmentData)).unwrap();
       await dispatch(fetchDepartments()); // refresh list
-
       setIsAddDepartmentOpen(false);
     } catch (err) {
       toast.error(err.message || "Failed to create department");
@@ -96,12 +93,12 @@ const EmployeeManagement = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1);
   };
 
   const handleItemsPerPageChange = (e) => {
     setItemsPerPage(parseInt(e.target.value));
-    setCurrentPage(1); // Reset to first page when items per page changes
+    setCurrentPage(1);
   };
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -112,14 +109,11 @@ const EmployeeManagement = () => {
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // If total pages is less than max visible, show all
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
-      // Always show first page
       pageNumbers.push(1);
-
       let startPage = Math.max(2, currentPage - 1);
       let endPage = Math.min(totalPages - 1, currentPage + 1);
 
@@ -129,22 +123,18 @@ const EmployeeManagement = () => {
         startPage = totalPages - 3;
       }
 
-      // Add ellipsis after first page if needed
       if (startPage > 2) {
         pageNumbers.push("...");
       }
 
-      // Add middle pages
       for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i);
       }
 
-      // Add ellipsis before last page if needed
       if (endPage < totalPages - 1) {
         pageNumbers.push("...");
       }
 
-      // Always show last page
       pageNumbers.push(totalPages);
     }
 
@@ -251,7 +241,7 @@ const EmployeeManagement = () => {
                 <th className="px-4 py-3 text-left">Admin Name</th>
                 <th className="px-4 py-3 text-left">Admin Email</th>
                 <th className="px-4 py-3 text-left">Admin Phone</th>
-                <th className="px-4 py-3 text-left">Department</th>
+                <th className="px-4 py-3 text-left">Department Name</th>
                 <th className="px-4 py-3 text-left">Department Email</th>
                 <th className="px-4 py-3 text-left">Floor</th>
                 <th className="px-4 py-3 text-left">Status</th>
@@ -262,7 +252,7 @@ const EmployeeManagement = () => {
               {currentItems.length > 0 ? (
                 currentItems.map((admin) => (
                   <tr
-                    key={admin.employee_id}
+                    key={admin.id}
                     className={
                       isDarkMode
                         ? "border-b border-gray-700 hover:bg-gray-700/50"
@@ -274,52 +264,52 @@ const EmployeeManagement = () => {
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {admin.full_name}
+                      {admin.adminFullName}
                     </td>
                     <td
                       className={`px-4 py-3 ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {admin.email}
+                      {admin.adminEmail}
                     </td>
                     <td
                       className={`px-4 py-3 ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {admin.phone}
+                      {admin.adminPhone}
                     </td>
                     <td
                       className={`px-4 py-3 ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {admin.department?.name || "-"}
+                      {admin.departmentName || "-"}
                     </td>
                     <td
                       className={`px-4 py-3 ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {admin.department?.email || "-"}
+                      {admin.departmentEmail || "-"}
                     </td>
                     <td
                       className={`px-4 py-3 ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {admin.department?.floor || "-"}
+                      {admin.floor || "-"}
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          admin.active
+                          admin.status === "Active"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {admin.active ? "Active" : "Inactive"}
+                        {admin.status}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -356,7 +346,7 @@ const EmployeeManagement = () => {
           </table>
         </div>
 
-        {/* Enhanced Pagination controls */}
+        {/* Pagination controls */}
         {filteredDepartments.length > 0 && (
           <div
             className={`flex flex-col sm:flex-row items-center justify-between mt-6 p-4 ${
@@ -378,9 +368,6 @@ const EmployeeManagement = () => {
                 {filteredDepartments.length}
               </span>{" "}
               entries
-              {searchTerm && (
-                <span> (filtered from {departments.length} total entries)</span>
-              )}
             </div>
 
             <div className="flex items-center space-x-1">
@@ -412,7 +399,7 @@ const EmployeeManagement = () => {
                 Previous
               </button>
 
-              {/* Page numbers with ellipsis */}
+              {/* Page numbers */}
               <div className="hidden sm:flex space-x-1">
                 {getPageNumbers().map((number, index) =>
                   number === "..." ? (

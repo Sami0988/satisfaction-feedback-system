@@ -1,3 +1,4 @@
+// frontend/src/api/department.js
 import API from "./index";
 
 export const getDepartments = async (page = 1, perPage = 12, search = "") => {

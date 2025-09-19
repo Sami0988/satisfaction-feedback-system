@@ -24,15 +24,15 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      - "${APP_PORT:-8080}:80"
+      - "8080:80"
     volumes:
-      - "./backend:/var/www/html:ro"
       - "./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
     depends_on:
       - laravel.test
+      - frontend
+      - admin-employee-frontend
     networks:
       - sail
-
   pgsql:
     image: postgres:17
     environment:
@@ -42,7 +42,7 @@ services:
     volumes:
       - "sail-pgsql:/var/lib/postgresql/data"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sami -d customer_satisfaction"] 
+      test: ["CMD-SHELL", "pg_isready -U sami -d customer_satisfaction"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -50,7 +50,7 @@ services:
       - sail
 
   pgadmin:
-    image: dpage/pgadmin4:8.5 
+    image: dpage/pgadmin4:8.5
     environment:
       PGADMIN_DEFAULT_EMAIL: sami@gmail.com
       PGADMIN_DEFAULT_PASSWORD: sami
@@ -63,13 +63,13 @@ services:
       - sail
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3001:3000"
     env_file:
-      - .env.docker  
+      - .env.docker
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -81,13 +81,13 @@ services:
     tty: true
 
   admin-employee-frontend:
-    build: 
+    build:
       context: ./admin-employee-frontend
       dockerfile: Dockerfile
     ports:
       - "3002:3000"
     env_file:
-      - .env.docker  
+      - .env.docker
     volumes:
       - ./admin-employee-frontend:/app
       - /app/node_modules
