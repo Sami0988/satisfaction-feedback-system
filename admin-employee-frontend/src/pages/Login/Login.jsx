@@ -1,3 +1,4 @@
+// admin-employee-frontend/src/pages/Login/Login.jsx
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ const Login = () => {
   // Redirect when logged in
   useEffect(() => {
     if (isAuthenticated && user) {
+      console.log("User data:", user); // Debugging line
       if (user.force_password_change) {
         navigate("/password-settings");
       } else {

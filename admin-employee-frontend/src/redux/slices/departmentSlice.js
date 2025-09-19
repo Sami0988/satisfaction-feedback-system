@@ -87,15 +87,13 @@ export const fetchDepartments = () => async (dispatch) => {
   try {
     const res = await getDepartmentsApi();
     console.log("Fetched departments response:", res.data);
-    const employees = res.data.employees || [];
 
+    // Save employees array instead of whole response
+    const employees = res.data.employees || [];
     dispatch(fetchSuccess(employees));
   } catch (error) {
-    console.error("Fetch departments error:", error);
     const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to fetch departments";
+      error.response?.data?.message || error.message || "Failed to fetch";
     dispatch(fetchFailure(message));
   }
 };
