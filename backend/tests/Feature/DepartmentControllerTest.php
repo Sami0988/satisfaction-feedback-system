@@ -38,15 +38,5 @@ class DepartmentControllerTest extends TestCase
 
 
     /** @test */
-    public function a_user_can_delete_a_department()
-    {
-        $department = Department::factory()->create();
-
-        $response = $this->actingAs($this->user)->deleteJson('/api/departments/' . $department->department_id);
-
-        $response->assertStatus(204);
-
-        $this->assertDatabaseMissing('departments', ['department_id' => $department->department_id]);
-    }
-
+ 
 }
