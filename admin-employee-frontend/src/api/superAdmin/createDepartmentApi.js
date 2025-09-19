@@ -1,14 +1,23 @@
-// api/superAdmin/createDepartmentApi.js
-import API from "../index"; // import your axios instance
+import API from "../index"; // your Axios instance
 
-const CREATE_DEPARTMENT_URL = "/departments/create";
+const SUPER_ADMIN_DEPARTMENTS_URL = "/super-admin/departments";
 
-export const createDepartmentApi = async (departmentData) => {
-  return API.post(CREATE_DEPARTMENT_URL, departmentData);
+// Get all departments (super-admin)
+export const getDepartmentsApi = async () => {
+  return API.get(SUPER_ADMIN_DEPARTMENTS_URL);
 };
 
+// Create a department
+export const createDepartmentApi = async (departmentData) => {
+  return API.post(`${SUPER_ADMIN_DEPARTMENTS_URL}`, departmentData);
+};
 
+// Update a department
+export const updateDepartmentApi = async (id, departmentData) => {
+  return API.put(`${SUPER_ADMIN_DEPARTMENTS_URL}/update/${id}`, departmentData);
+};
 
-export const getDepartmentsApi = async () => {
-  return API.get("/departments");
+// Delete a department
+export const deleteDepartmentApi = async (id) => {
+  return API.delete(`${SUPER_ADMIN_DEPARTMENTS_URL}/delete/${id}`);
 };

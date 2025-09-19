@@ -167,11 +167,13 @@ public function index(Request $request)
         ];
     });
 
+    // Return the mapped response, not the original $employees
     return response()->json([
         'status'    => 'success',
-        'employees' => $employees->values() 
+        'employees' => $response->values() 
     ]);
 }
+
 
 public function putUpdate(Request $request, $id)
 {
