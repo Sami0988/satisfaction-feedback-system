@@ -8,6 +8,9 @@ use App\Http\Controllers\ServiceSelector\ServiceController;
 use App\Http\Controllers\ServiceSelector\EmployeeController;
 use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
 use App\Http\Controllers\SuperAdminController\AddDepartmentController;
+use App\Http\Controllers\AdminController\DepartmentAdminController;
+
+
 
 
 
@@ -39,14 +42,14 @@ Route::get('/departments/{department_id}/services', [ServiceController::class, '
 // frontend page department selection
 Route::apiResource('departments', DepartmentController::class)->only(['index', 'show']); 
 
-
  // frontend page employees selection
-// Instead of defining each route manually:
 Route::apiResource('employees', EmployeeController::class);
 
 
 
 
+// Super Admin routes for creating and managing super admins
+ Route::post('/super-admin/create', [AddSuperAdminController::class, 'store']);
 
 // Super Admin routes
 Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
@@ -59,3 +62,20 @@ Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
 
 
 
+
+// Admin routes for managing employees and services in their department
+Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
+
+    // Add employee and/or service
+    Route::post('/employee-service', [DepartmentAdminController::class, 'addEmployeeAndService']);
+
+    // Get all employees and services in admin's department
+    Route::get('/employee-service', [DepartmentAdminController::class, 'getDepartmentData']);
+
+    // Update employee and optionally linked service
+    Route::put('/employee-service/{employeeId}', [DepartmentAdminController::class, 'putUpdateEmployeeService']);
+    Route::patch('/employee-service/{employeeId}', [DepartmentAdminController::class, 'patchUpdateEmployeeService']);
+
+    // Delete employee or service by type and id
+    Route::delete('/employee-service/{id}', [DepartmentAdminController::class, 'destroy']);
+});
