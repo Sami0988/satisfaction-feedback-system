@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\AuthController\PasswordController;
 use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
 use App\Http\Controllers\ServiceSelector\FeedbackFormController;
@@ -57,5 +57,5 @@ Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
     Route::delete('/departments/{id}', [AddDepartmentController::class, 'destroy']);
 });
 
-
+Route::middleware('auth:sanctum')->post('/password/update', [PasswordController::class, 'update']);
 
