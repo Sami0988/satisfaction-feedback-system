@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\AuthController\ForgotPasswordController;
 use App\Http\Controllers\AuthController\PasswordController;
 use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
@@ -60,8 +61,13 @@ Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
     Route::delete('/departments/{id}', [AddDepartmentController::class, 'destroy']);
 });
 
+
+// password routes
 Route::middleware('auth:sanctum')->post('/password/update', [PasswordController::class, 'update']);
 
+
+Route::post('/forgot/password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset/password/{token}', [ForgotPasswordController::class, 'resetPassword']);
 
 // Admin routes for managing employees and services in their department
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
@@ -79,3 +85,4 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     // Delete employee or service by type and id
     Route::delete('/employee-service/{id}', [DepartmentAdminController::class, 'destroy']);
 });
+
