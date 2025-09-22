@@ -9,37 +9,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FeedbackQuestion extends Model
 {
-    use HasFactory;
+   use HasFactory;
 
-    protected $table = 'feedback_questions';
-    protected $primaryKey = 'question_id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $table = 'feedback_question'; // Specify the custom table name
+
+    protected $primaryKey = 'question_id'; // Specify the custom primary key name
 
     protected $fillable = [
-        'question_id',
-        'form_id',
         'question_text',
-        'question_type',
-        'is_required',
-        'display_order',
-        'weight',
+        'category',
+        'type',
     ];
-
-    protected $casts = [
-        'question_id' => 'string',
-        'form_id' => 'string',
-        'is_required' => 'boolean',
-        'weight' => 'decimal:2',
-    ];
-
-    public function form(): BelongsTo
-    {
-        return $this->belongsTo(FeedbackForm::class, 'form_id', 'form_id');
-    }
-
-    public function responses(): HasMany
-    {
-        return $this->hasMany(FeedbackResponse::class, 'question_id', 'question_id');
-    }
 }

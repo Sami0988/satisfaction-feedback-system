@@ -164,26 +164,11 @@ public function getDepartmentData(Request $request)
   /**
  * PUT update employee
  */
-public function putUpdateEmployee(Request $request, $id)
-{
-    return $this->updateEmployeeOrService($request, $id, 'employee', true);
-}
 
 /**
  * PATCH update employee
  */
-public function patchUpdateEmployee(Request $request, $id)
-{
-    return $this->updateEmployeeOrService($request, $id, 'employee', false);
-}
 
-/**
- * PUT update service
- */
-public function putUpdateService(Request $request, $id)
-{
-    return $this->updateEmployeeOrService($request, $id, 'service', true);
-}
 
 /**
  * PATCH update service
@@ -267,17 +252,17 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
 }
 
 
-     
 
 
 
-    
-    
+
+
+
      /**
      * Delete employee or service
      */
-   
-   
+
+
      public function destroy(Request $request, $type, $id)
     {
         $admin = $request->user();
