@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\AuthController\ForgotPasswordController;
 use App\Http\Controllers\AuthController\PasswordController;
 use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
@@ -58,4 +59,7 @@ Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->post('/password/update', [PasswordController::class, 'update']);
+
+Route::post('/forgot/password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset/password/{token}', [ForgotPasswordController::class, 'resetPassword']);
 
