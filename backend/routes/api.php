@@ -58,6 +58,8 @@ Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
     Route::delete('/departments/{id}', [AddDepartmentController::class, 'destroy']);
 });
 
+
+// password routes
 Route::middleware('auth:sanctum')->post('/password/update', [PasswordController::class, 'update']);
 
 Route::post('/forgot/password', [ForgotPasswordController::class, 'sendResetLink']);
