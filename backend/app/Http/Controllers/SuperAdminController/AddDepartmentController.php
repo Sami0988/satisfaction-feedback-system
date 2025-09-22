@@ -154,7 +154,8 @@ public function index(Request $request)
     // Map to desired response format
     $response = $employees->map(function ($emp) {
         return [
-            'id'              => $emp->employee_id,
+            'employee_id'     => $emp->employee_id,
+            'department_id'   => $emp->department_id,
             'adminEmail'      => $emp->email,
             'adminFullName'   => $emp->full_name,
             'adminPhone'      => $emp->phone,
@@ -177,29 +178,38 @@ public function index(Request $request)
 
 public function putUpdate(Request $request, $id)
 {
-    // Find the department
+    return $this->updateDepartment($request, $id, true);
+}
+
+public function patchUpdate(Request $request, $id)
+{
+    return $this->updateDepartment($request, $id, false);
+}
+
+private function updateDepartment(Request $request, $id, $isFullUpdate = false)
+{
     $department = Department::findOrFail($id);
+    $employee   = Employee::where('department_id', $department->department_id)->first();
 
-    // Find the admin/employee assigned to this department
-    $employee = Employee::where('department_id', $department->department_id)->first();
+    $rules = [
+        'departmentName'  => $isFullUpdate ? 'required|string|max:255' : 'sometimes|required|string|max:255',
+        'floor'           => $isFullUpdate ? 'nullable|string|max:50' : 'sometimes|nullable|string|max:50',
+        'departmentEmail' => ($isFullUpdate ? 'required' : 'sometimes|required') .
+                             '|email|unique:departments,email,' . $department->department_id . ',department_id',
+        'departmentPhone' => $isFullUpdate ? 'nullable|string|max:20' : 'sometimes|nullable|string|max:20',
+    ];
 
-    // Validate input
-    $validator = Validator::make($request->all(), [
-        // Department fields
-        'departmentName'  => 'required|string|max:255',
-        'floor'           => 'nullable|string|max:50',
-        'departmentEmail' => 'required|email|unique:departments,email,' . $department->department_id . ',department_id',
-        'departmentPhone' => 'nullable|string|max:20',
+    if ($employee) {
+        $rules += [
+            'full_name' => $isFullUpdate ? 'required|string|max:255' : 'sometimes|required|string|max:255',
+            'email'     => ($isFullUpdate ? 'required' : 'sometimes|required') .
+                           '|email|unique:employees,email,' . $employee->employee_id . ',employee_id',
+            'phone'     => $isFullUpdate ? 'nullable|string|max:20' : 'sometimes|nullable|string|max:20',
+            'password'  => $isFullUpdate ? 'nullable|string|min:6' : 'sometimes|nullable|string|min:6',
+        ];
+    }
 
-        // Employee fields (only validate if employee exists)
-        'full_name' => $employee ? 'sometimes|required|string|max:255' : 'nullable',
-        'email'     => $employee 
-                        ? 'sometimes|required|email|unique:employees,email,' . $employee->employee_id . ',employee_id'
-                        : 'nullable',
-        'phone'     => 'sometimes|nullable|string|max:20',
-        'password'  => 'sometimes|nullable|string|min:6',
-    ]);
-
+    $validator = Validator::make($request->all(), $rules);
     if ($validator->fails()) {
         return response()->json([
             'status' => 'error',
@@ -209,13 +219,13 @@ public function putUpdate(Request $request, $id)
 
     // Update department
     $department->update([
-        'name'  => $request->departmentName,
-        'floor' => $request->floor,
-        'email' => $request->departmentEmail,
-        'phone' => $request->departmentPhone,
+        'name'  => $request->departmentName ?? $department->name,
+        'floor' => $request->floor ?? $department->floor,
+        'email' => $request->departmentEmail ?? $department->email,
+        'phone' => $request->departmentPhone ?? $department->phone,
     ]);
 
-    // Update employee if exists
+    // Update employee
     if ($employee) {
         $employee->update([
             'full_name' => $request->full_name ?? $employee->full_name,
@@ -225,46 +235,45 @@ public function putUpdate(Request $request, $id)
         ]);
     }
 
+    $department->refresh();
+    if ($employee) $employee->refresh();
+
     return response()->json([
         'status'     => 'success',
-        'message'    => 'Department and admin updated successfully.',
+        'message'    => $isFullUpdate ? 'Department fully updated.' : 'Department partially updated.',
         'department' => $department,
-        'admin'      => $employee
+        'employee'   => $employee
     ]);
-}    /**
-     * PATCH - Partial update (only given fields)
-     */
-    public function patchUpdate(Request $request, $id)
-    {
-        $department = Department::findOrFail($id);
+}
 
-        $department->update([
-            'name'  => $request->departmentName ?? $department->name,
-            'floor' => $request->floor ?? $department->floor,
-            'email' => $request->departmentEmail ?? $department->email,
-            'phone' => $request->departmentPhone ?? $department->phone,
-        ]);
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Department partially updated successfully.',
-            'department' => $department
-        ]);
-    }
 
     /**
      * DELETE - Remove department
      */
-    public function destroy($id)
-    {
-        $department = Department::findOrFail($id);
-        $department->delete();
+public function destroy($id)
+{
+    // Find the department
+    $department = Department::findOrFail($id);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Department deleted successfully.'
-        ]);
+    // Find all employees with this department_id
+    $employees = \App\Models\Employee::where('department_id', $department->department_id)->get();
+
+    // Delete each employee
+    foreach ($employees as $employee) {
+        $employee->delete();
     }
+
+    // Delete the department
+    $department->delete();
+
+    return response()->json([
+        'status'  => 'success',
+        'message' => 'Department and its employees deleted successfully.'
+    ]);
+}
+
+
+
 
 
 

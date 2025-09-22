@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useDispatch } from "react-redux";
 import ThemeContext from "../../../context/ThemeContext";
+import { patchUpdateDepartmentApi } from "../../../api/superAdmin/createDepartmentApi";
+import { toast } from "react-toastify";
 
-const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
+const EditDepartmentAdmin = ({ isOpen, onClose, admin, refreshList }) => {
   const { isDarkMode } = useContext(ThemeContext);
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     adminFullName: "",
     adminEmail: "",
@@ -15,6 +20,9 @@ const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
     status: "Active",
   });
 
+  const [loading, setLoading] = useState(false);
+
+  // Populate form when admin is selected
   useEffect(() => {
     if (admin) {
       setFormData({
@@ -39,9 +47,45 @@ const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
+    if (!admin) return;
+
+    try {
+      setLoading(true);
+
+      // Prepare only changed fields
+      const updatedFields = {};
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== admin[key] && formData[key] !== "") {
+          // Map admin fields to backend fields
+          if (key === "adminFullName") updatedFields.full_name = formData[key];
+          else if (key === "adminEmail") updatedFields.email = formData[key];
+          else if (key === "adminPhone") updatedFields.phone = formData[key];
+          else updatedFields[key] = formData[key];
+        }
+      });
+
+      if (Object.keys(updatedFields).length === 0) {
+        toast.info("No changes to update.");
+        setLoading(false);
+        return;
+      }
+
+      await patchUpdateDepartmentApi(admin.department_id, updatedFields);
+      toast.success("Department updated successfully!");
+      onClose();
+      if (refreshList) refreshList(); // optional: refresh department list
+    } catch (err) {
+      const errors = err.response?.data?.errors;
+      if (errors) {
+        Object.values(errors).forEach((msg) => toast.error(msg));
+      } else {
+        toast.error("Failed to update department");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -75,182 +119,72 @@ const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Admin Full Name
-              </label>
-              <input
-                type="text"
-                name="adminFullName"
-                value={formData.adminFullName}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Admin Email
-              </label>
-              <input
-                type="email"
-                name="adminEmail"
-                value={formData.adminEmail}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Admin Phone
-              </label>
-              <input
-                type="tel"
-                name="adminPhone"
-                value={formData.adminPhone}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Admin Role
-              </label>
-              <input
-                type="text"
-                name="adminRole"
-                value={formData.adminRole}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Department Name
-              </label>
-              <input
-                type="text"
-                name="departmentName"
-                value={formData.departmentName}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Department Email
-              </label>
-              <input
-                type="email"
-                name="departmentEmail"
-                value={formData.departmentEmail}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Department Phone
-              </label>
-              <input
-                type="tel"
-                name="departmentPhone"
-                value={formData.departmentPhone}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Floor
-              </label>
-              <input
-                type="text"
-                name="floor"
-                value={formData.floor}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
-                required
-              />
-            </div>
-
+            {/* Admin Full Name */}
+            <InputField
+              label="Admin Full Name"
+              name="adminFullName"
+              value={formData.adminFullName}
+              onChange={handleChange}
+              required
+              isDarkMode={isDarkMode}
+            />
+            {/* Admin Email */}
+            <InputField
+              label="Admin Email"
+              name="adminEmail"
+              type="email"
+              value={formData.adminEmail}
+              onChange={handleChange}
+              required
+              isDarkMode={isDarkMode}
+            />
+            {/* Admin Phone */}
+            <InputField
+              label="Admin Phone"
+              name="adminPhone"
+              type="tel"
+              value={formData.adminPhone}
+              onChange={handleChange}
+              required
+              isDarkMode={isDarkMode}
+            />
+            {/* Admin Role */}
+            <InputField
+              label="Admin Role"
+              name="adminRole"
+              value={formData.adminRole}
+              onChange={handleChange}
+              required
+              isDarkMode={isDarkMode}
+            />
+            {/* Department Name */}
+            <InputField
+              label="Department Name"
+              name="departmentName"
+              value={formData.departmentName}
+              onChange={handleChange}
+              required
+              isDarkMode={isDarkMode}
+            />
+            {/* Department Email */}
+            <InputField
+              label="Department Email"
+              name="departmentEmail"
+              type="email"
+              value={formData.departmentEmail}
+              onChange={handleChange}
+              isDarkMode={isDarkMode}
+            />
+            {/* Floor */}
+            <InputField
+              label="Floor"
+              name="floor"
+              type="number"
+              value={formData.floor}
+              onChange={handleChange}
+              isDarkMode={isDarkMode}
+            />
+            {/* Status */}
             <div>
               <label
                 className={`block text-sm font-medium mb-1 ${
@@ -268,7 +202,6 @@ const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
                     ? "bg-gray-700 text-white border-gray-600"
                     : "bg-white text-gray-900 border-gray-300"
                 }`}
-                required
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
@@ -290,9 +223,10 @@ const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              disabled={loading}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >
-              Save Changes
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
@@ -300,5 +234,38 @@ const EditDepartmentAdmin = ({ isOpen, onClose, onSave, admin }) => {
     </div>
   );
 };
+
+// Reusable Input Field Component
+const InputField = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+  isDarkMode,
+}) => (
+  <div>
+    <label
+      className={`block text-sm font-medium mb-1 ${
+        isDarkMode ? "text-gray-300" : "text-gray-700"
+      }`}
+    >
+      {label}
+    </label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className={`w-full px-3 py-2 border rounded-md ${
+        isDarkMode
+          ? "bg-gray-700 text-white border-gray-600"
+          : "bg-white text-gray-900 border-gray-300"
+      }`}
+    />
+  </div>
+);
 
 export default EditDepartmentAdmin;

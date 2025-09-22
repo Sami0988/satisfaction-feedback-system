@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import ThemeContext from "../../../context/ThemeContext";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addEmployeeAndService } from "../../../redux/slices/departmentHeadSlice";
+import { toast } from "react-toastify";
 
 const AddEmployee = () => {
   const { isDarkMode } = useContext(ThemeContext);
-
   const admin = useSelector((state) => state.auth.user); // logged-in admin
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
     phone: "",
-    password: "",
-    role: "",
-    service_id: "",
     service_name: "",
     category: "",
     description: "",
@@ -27,25 +26,38 @@ const AddEmployee = () => {
     e.preventDefault();
 
     try {
-      alert("Employee added successfully!");
+      // Payload without password; backend handles it
+      const payload = {
+        employee: {
+          full_name: formData.full_name,
+          email: formData.email,
+          phone: formData.phone,
+          role: "staff", // always staff
+        },
+        service: {
+          name: formData.service_name,
+          category: formData.category,
+          description: formData.description,
+        },
+      };
+
+      const res = await dispatch(addEmployeeAndService(payload));
+
+      console.log("Add Employee Response:", res);
+      toast.success("Employee added successfully!");
+
+      // Reset form
       setFormData({
         full_name: "",
         email: "",
         phone: "",
-        password: "",
-        role: "",
-        service_id: "",
         service_name: "",
         category: "",
         description: "",
       });
-      const payload = {
-        ...formData,
-        created_by: admin?.id || admin?.userId || "unknown", // send admin id
-      };
-      console.log("Submitted Data:", payload);
     } catch (error) {
-      alert(error.message);
+      const message = error.response?.data?.message || error.message;
+      toast.error(`Failed to add employee: ${message}`);
     }
   };
 
@@ -83,7 +95,7 @@ const AddEmployee = () => {
           />
         </div>
 
-        {/* Email (optional) */}
+        {/* Email */}
         <div>
           <label className="block font-medium mb-1">Email (optional)</label>
           <input
@@ -100,7 +112,7 @@ const AddEmployee = () => {
           />
         </div>
 
-        {/* Phone (optional) */}
+        {/* Phone */}
         <div>
           <label className="block font-medium mb-1">Phone (optional)</label>
           <input
@@ -117,22 +129,16 @@ const AddEmployee = () => {
           />
         </div>
 
-        {/* Role Dropdown */}
+        {/* Role (fixed to staff) */}
         <div>
           <label className="block font-medium mb-1">Role</label>
-          <select
+          <input
+            type="text"
             name="role"
-            value={formData.role}
-            onChange={handleChange}
-            required
-            className={`w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-500 ${
-              isDarkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-black"
-            }`}
-          >
-            <option value="">Select Role</option>
-            <option value="admin">Admin</option>
-            <option value="staff">Staff</option>
-          </select>
+            value="staff"
+            readOnly
+            className={`w-full p-2 border rounded-md bg-gray-200 text-gray-600 cursor-not-allowed`}
+          />
         </div>
 
         {/* Service Name */}
