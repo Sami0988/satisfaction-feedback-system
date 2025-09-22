@@ -5,9 +5,10 @@ import Header from "../../../components/Header";
 import ThemeContext from "../../../context/ThemeContext";
 import PasswordSettings from "../../../components/PasswordSettings";
 import Dashboard from "./Dashboard";
-import EmployeeManagement from "./EmployeeManagement";
+import DepartmentManagement from "./DepartmentManagment";
 import ServiceManagement from "./ServiceManagement";
 import Reports from "./Reports";
+import EmployeeManagement from "./EmployeeManagement";
 
 
 const AdminDashboard = () => {
@@ -20,12 +21,15 @@ const AdminDashboard = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // Render the appropriate section based on activeSection state
   const renderSection = () => {
     switch (activeSection) {
       case "dashboard":
         return <Dashboard />;
       case "employees":
         return <EmployeeManagement />;
+      case "departments":
+        return <DepartmentManagement />;
       case "services":
         return <ServiceManagement />;
       case "reports":
@@ -38,21 +42,25 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className={`min-h-screen flex ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}>
+    <div
+      className={`min-h-screen flex ${
+        isDarkMode ? "bg-gray-900" : "bg-gray-100"
+      }`}
+    >
       <Sidebar
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
       />
-      
+
       <div className="flex-1 flex flex-col">
-        <Header 
-          user={user} 
-          toggleSidebar={toggleSidebar} 
-          isSidebarOpen={isSidebarOpen} 
+        <Header
+          user={user}
+          toggleSidebar={toggleSidebar}
+          isSidebarOpen={isSidebarOpen}
         />
-        
+
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           {renderSection()}
         </main>

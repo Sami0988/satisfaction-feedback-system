@@ -2,7 +2,7 @@ import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../redux/slices/AuthSlice";
-import {useDispatch} from "react-redux"
+import { useDispatch } from "react-redux"
 
 const Sidebar = ({
   activeSection,
@@ -11,21 +11,19 @@ const Sidebar = ({
   toggleSidebar,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
 
   const navigate = useNavigate();
   //const dispatch = useDispatch();
 
-  const handleLogout = () => {
-    console.log("Logging out...");
-    // Clear redux state
-    //dispatch(logout());
-    dispatch(logoutUser());  // clears auth + localStorage
-    navigate("/");           // go to login page
-
-  };
-
+const handleLogout = () => {
+  console.log("Logging out...");
+  // Clear redux state
+  //dispatch(logout());
+  dispatch(logoutUser()); // clears auth + localStorage
+  navigate("/"); // go to login page
+};
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "📊" },
     { id: "employees", label: "Employees", icon: "👥" },
