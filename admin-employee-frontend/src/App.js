@@ -17,7 +17,9 @@ import { getDashboardPath } from "./utils/redirect";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
-import SuperAdminDashboard from "./pages/Dashboard/SuperAdminDashboard/SuperAdminDashboard ";
+import SuperAdminDashboard from "./pages/Dashboard/SuperAdminDashboard/SuperAdminDashboard";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -75,7 +77,7 @@ function App() {
             <Route
               path="/employee/dashboard"
               element={
-                <ProtectedRoute requiredRole="employee">
+                <ProtectedRoute requiredRole="staff">
                   <EmployeeDashboard />
                 </ProtectedRoute>
               }
@@ -93,6 +95,12 @@ function App() {
 
             {/* Optional: Redirect /login → / */}
             <Route path="/login" element={<Navigate to="/" replace />} />
+
+            {/* ✅ Forgot Password Page */}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+
+            {/* ✅ Reset Password Page */}
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             {/* Catch All */}
             <Route path="*" element={<Navigate to="/" replace />} />

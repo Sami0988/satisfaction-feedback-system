@@ -69,6 +69,7 @@ Route::middleware('auth:sanctum')->post('/password/update', [PasswordController:
 Route::post('/forgot/password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/reset/password/{token}', [ForgotPasswordController::class, 'resetPassword']);
 
+
 // Admin routes for managing employees and services in their department
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 

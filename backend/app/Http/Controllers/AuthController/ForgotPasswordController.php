@@ -16,35 +16,41 @@ class ForgotPasswordController extends Controller
     /**
      * Step 1: Send reset password link to email
      */
-    public function sendResetLink(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|exists:employees,email',
-        ]);
+  public function sendResetLink(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email|exists:employees,email',
+    ]);
 
-        // generate token
-        $token = Str::random(60);
+    // generate token
+    $token = Str::random(60);
 
-        // store token in password_resets table
-        DB::table('password_resets')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => $token,
-                'created_at' => Carbon::now(),
-            ]
-        );
+    // store token in password_resets table
+    DB::table('password_resets')->updateOrInsert(
+        ['email' => $request->email],
+        [
+            'token' => $token,
+            'created_at' => Carbon::now(),
+        ]
+    );
 
-        // create reset link (frontend or API route)
-        $resetLink = url('/api/reset/password/' . $token);
+    // get frontend URL from env
+    $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+    $resetLink = $frontendUrl . '/reset-password/' . $token;
 
-        // send email with link
-        Mail::raw("Click the link below to reset your password:\n\n$resetLink", function ($message) use ($request) {
+    // send email
+    Mail::raw(
+        "You requested a password reset.\n\nClick the link below to reset your password:\n$resetLink",
+        function ($message) use ($request) {
             $message->to($request->email)
                     ->subject('Password Reset Request');
-        });
+        }
+    );
 
-        return response()->json(['message' => 'Password reset link sent! Check your email.']);
-    }
+    return response()->json(['message' => 'Password reset link sent! Check your email.']);
+}
+
+
 
     /**
      * Step 2: Reset password using token (no email required)
