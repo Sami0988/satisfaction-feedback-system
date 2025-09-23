@@ -9,12 +9,7 @@ const FeedbackPage = () => {
   const { darkMode } = useDarkMode();
   const [entity, setEntity] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState({
-    rating: 0,
-    comments: "",
-    suggestions: "",
-    wouldRecommend: null,
-  });
+
 
   useEffect(() => {
     const fetchEntity = async () => {
