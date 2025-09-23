@@ -45,7 +45,7 @@ const Sidebar = ({
       });
   } else if (user?.role === "Department Admin") {
     visibleMenuItems = menuItems.filter(
-      (item) => !["employees", "service-request"].includes(item.id)
+      (item) => !["service-request"].includes(item.id)
     );
   } else if (user?.role === "staff") {
     visibleMenuItems = menuItems.filter((item) =>

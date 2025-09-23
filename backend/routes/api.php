@@ -13,13 +13,6 @@ use App\Http\Controllers\AdminController\DepartmentAdminController;
 
 
 
-
-
-
-use App\Http\Controllers\UserController;
-
-
-use App\Http\Controllers\Controller;
 // use App\Http\Controllers\AddDepartmentController;
 
 Route::get('/feedback-forms', [FeedbackFormController::class, 'index']);
@@ -87,3 +80,10 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     Route::delete('/employee-service/{id}', [DepartmentAdminController::class, 'destroy']);
 });
 
+
+// user routes for feedback submission and retrieval and qr code generation
+// QR code route
+Route::get('/department/{department_id}/qr', [AddDepartmentController::class, 'generateQr']);
+
+// Department info route
+Route::get('/department/{department_id}', [AddDepartmentController::class, 'getDepartmentInfo']);

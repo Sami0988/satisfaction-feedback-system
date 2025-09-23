@@ -35,8 +35,12 @@ class ForgotPasswordController extends Controller
     );
 
     // get frontend URL from env
-    $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+    $frontendUrl = env('DOCKER_ENV', false)
+        ? env('FRONTEND_URL_DOCKER')
+        : env('FRONTEND_URL_LOCAL');
+
     $resetLink = $frontendUrl . '/reset-password/' . $token;
+
 
     // send email
     Mail::raw(
