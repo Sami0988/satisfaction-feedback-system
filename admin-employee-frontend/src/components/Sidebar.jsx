@@ -3,6 +3,7 @@ import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../redux/slices/AuthSlice";
 import { useSelector, useDispatch } from "react-redux";
+
 const Sidebar = ({
   activeSection,
   setActiveSection,
@@ -15,8 +16,7 @@ const Sidebar = ({
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    console.log("Logging out...");
-    await dispatch(logoutUser()); 
+    await dispatch(logoutUser());
     navigate("/"); // redirect to login/home
   };
 
@@ -26,33 +26,38 @@ const Sidebar = ({
     { id: "employees", label: "Employees", icon: "👥" },
     { id: "services", label: "Services", icon: "🛠️" },
     { id: "reports", label: "Reports", icon: "📈" },
+    { id: "feedback", label: "Feedback", icon: "💬" },
     { id: "settings", label: "Password Settings", icon: "⚙️" },
+    { id: "service-request", label: "Service Request", icon: "📝" }, // for staff
   ];
 
-  // Adjust menu items based on role
-  const visibleMenuItems = menuItems
-    .map((item) => {
-      if (item.id === "employees" && user?.role === "Super Admin") {
-        // Rename Employees to Department for Super Admin
-        return { ...item, label: "Department" };
-      }
+  // Determine visible items based on role
+  let visibleMenuItems = [];
 
-      // Add Feedback item for Admin and Super Admin
-      if (
-        item.id === "reports" &&
-        ["Super Admin", "Admin"].includes(user?.role)
-      ) {
-        return [item, { id: "feedback", label: "Feedback", icon: "💬" }];
-      }
-
-      return item;
-    })
-    .flat() // flatten nested arrays
-    .filter((item) => {
-      // Hide services for Super Admin
-      if (user?.role === "Super Admin" && item.id === "services") return false;
-      return true;
-    });
+  if (user?.role === "Super Admin") {
+    visibleMenuItems = menuItems
+      .filter(
+        (item) => !["service-request"].includes(item.id) // hide staff-only
+      )
+      .map((item) => {
+        if (item.id === "employees") return { ...item, label: "Department" }; // rename
+        return item;
+      });
+  } else if (user?.role === "Department Admin") {
+    visibleMenuItems = menuItems.filter(
+      (item) => !["employees", "service-request"].includes(item.id)
+    );
+  } else if (user?.role === "staff") {
+    visibleMenuItems = menuItems.filter((item) =>
+      [
+        "dashboard",
+        "feedback",
+        "service-request",
+        "reports",
+        "settings",
+      ].includes(item.id)
+    );
+  }
 
   return (
     <>
@@ -76,7 +81,7 @@ const Sidebar = ({
               isDarkMode ? "text-white" : "text-gray-800"
             }`}
           >
-            Admin Panel
+            {user?.role === "staff" ? "Employee Panel" : "Admin Panel"}
           </h1>
           <button onClick={toggleSidebar} className="md:hidden p-1 rounded-md">
             ✕
@@ -92,7 +97,7 @@ const Sidebar = ({
                     setActiveSection(item.id);
                     if (window.innerWidth < 768) toggleSidebar();
                   }}
-                  className={`w-full flex items-center p-2 rounded-lg transition-colors text-sm ${
+                  className={`w-full flex items-center p-2 rounded-lg text-sm transition-colors ${
                     activeSection === item.id
                       ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100"
                       : `hover:bg-gray-100 dark:hover:bg-gray-700 ${

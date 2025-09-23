@@ -9,6 +9,7 @@ import Sidebar from "../../../components/Sidebar";
 import Header from "../../../components/Header";
 import ThemeContext from "../../../context/ThemeContext";
 import PasswordSettings from "../../../components/PasswordSettings";
+import Feedback from "../../../components/Feedback";
 
 const AdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -37,6 +38,8 @@ const AdminDashboard = () => {
         return <Reports />;
       case "settings":
         return <PasswordSettings />;
+      case "feedback":
+        return <Feedback />;
       default:
         return (
           <>
