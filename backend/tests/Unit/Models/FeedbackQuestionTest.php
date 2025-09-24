@@ -26,7 +26,6 @@ class FeedbackQuestionTest extends TestCase
         $this->assertEquals('question_id', $question->getKeyName());
     }
 
-    /** @test */
    
 
     /** @test */
