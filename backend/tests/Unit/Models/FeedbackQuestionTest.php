@@ -40,13 +40,6 @@ class FeedbackQuestionTest extends TestCase
         $this->assertFalse($question->getIncrementing());
     }
 
-    /** @test */
-
-
-    /** @test */
-
-
-    /** @test */
 
     /** @test */
     public function it_has_many_responses()
