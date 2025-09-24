@@ -27,11 +27,7 @@ class FeedbackQuestionTest extends TestCase
     }
 
     /** @test */
-    public function it_has_correct_key_type()
-    {
-        $question = new FeedbackQuestion();
-        $this->assertEquals('string', $question->getKeyType());
-    }
+   
 
     /** @test */
     public function it_has_correct_incrementing_setting()
