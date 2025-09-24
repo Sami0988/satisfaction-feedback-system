@@ -30,6 +30,10 @@ const Login = () => {
     }
   }, [isAuthenticated, user, navigate]);
 
+  const handleForgotPassword = () => {
+    navigate("/forgot-password");
+  };
+
   const handleChange = (e) => {
     setCredentials({
       ...credentials,
@@ -264,14 +268,13 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="text-center">
-          <a
-            href="#"
-            className="text-gray-600 hover:text-gray-800 text-sm transition duration-200"
-          >
-            Forgot your password?
-          </a>
-        </div>
+        <button
+          type="button"
+          onClick={handleForgotPassword}
+          className="text-gray-600 hover:text-gray-800 text-sm transition duration-200 items-center mx-auto flex"
+        >
+          Forgot your password?
+        </button>
       </div>
     </div>
   );

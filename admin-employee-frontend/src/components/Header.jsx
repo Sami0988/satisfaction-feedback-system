@@ -1,14 +1,47 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import ThemeContext from "../context/ThemeContext";
 
 const Header = ({ user, toggleSidebar, isSidebarOpen }) => {
   const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
 
+  useEffect(() => {
+    console.log("User data in Header:", user);
+  }, [user]);
+
+  // normalize role string: lowercase, remove spaces and non-alphanumeric chars
+  const normalize = (s) =>
+    s
+      ? s
+          .toString()
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+      : "";
+
+  const getDashboardTitle = (role) => {
+    const r = normalize(role);
+    if (!r) return "Dashboard";
+
+    if (r.includes("super") && r.includes("admin"))
+      return "Super Admin Dashboard";
+    if (r.includes("department") && r.includes("admin"))
+      return "Department Head Dashboard";
+    if (r.includes("employee") || r.includes("staff"))
+      return "Employee Dashboard";
+    if (r.includes("admin")) return "Admin Dashboard";
+    return "Dashboard";
+  };
+
+  // prefer name fields that exist in your payload
+  const displayName =
+    user?.name || user?.full_name || user?.fullName || user?.email || "User";
+
   return (
     <header
       className={`${
         isDarkMode ? "bg-gray-800" : "bg-white"
-      } shadow-sm border-b border-gray-200 dark:border-gray-700 py-3 px-4`}
+      } shadow-sm py-3 px-4 border-b ${
+        isDarkMode ? "border-gray-700" : "border-gray-200"
+      }`}
     >
       <div className="flex justify-between items-center">
         <div className="flex items-center">
@@ -23,7 +56,14 @@ const Header = ({ user, toggleSidebar, isSidebarOpen }) => {
               <span className="text-2xl">☰</span>
             )}
           </button>
-          <h1 className="text-xl font-bold">Admin Dashboard</h1>
+
+          <h1
+            className={`text-xl font-bold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            {getDashboardTitle(user?.role)}
+          </h1>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -41,11 +81,18 @@ const Header = ({ user, toggleSidebar, isSidebarOpen }) => {
 
           <div className="flex items-center space-x-2">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">{user?.name}</p>
+              <p
+                className={`text-sm font-medium ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                {displayName}
+              </p>
               <p className="text-xs text-indigo-600 dark:text-indigo-400 capitalize">
                 {user?.role}
               </p>
             </div>
+
             <div className="relative group">
               <img
                 className="h-8 w-8 rounded-full object-cover"
@@ -55,6 +102,7 @@ const Header = ({ user, toggleSidebar, isSidebarOpen }) => {
                 }
                 alt="Profile"
               />
+
               <div
                 className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 ${
                   isDarkMode ? "bg-gray-800" : "bg-white"
