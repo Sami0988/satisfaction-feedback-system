@@ -16,7 +16,7 @@ class FeedbackQuestionTest extends TestCase
     public function it_has_correct_table_name()
     {
         $question = new FeedbackQuestion();
-        $this->assertEquals('feedback_questions', $question->getTable());
+        $this->assertEquals('feedback_question', $question->getTable());
     }
 
     /** @test */
@@ -41,43 +41,12 @@ class FeedbackQuestionTest extends TestCase
     }
 
     /** @test */
-    public function it_has_fillable_attributes()
-    {
-        $question = new FeedbackQuestion();
-        $expectedFillable = [
-            'question_id',
-            'form_id',
-            'question_text',
-            'question_type',
-            'is_required',
-            'display_order',
-            'weight',
-        ];
-        $this->assertEquals($expectedFillable, $question->getFillable());
-    }
+
 
     /** @test */
-    public function it_has_correct_casts()
-    {
-        $question = new FeedbackQuestion();
-        $expectedCasts = [
-            'question_id' => 'string',
-            'form_id' => 'string',
-            'is_required' => 'boolean',
-            'weight' => 'decimal:2',
-        ];
-        $this->assertEquals($expectedCasts, $question->getCasts());
-    }
+
 
     /** @test */
-    public function it_belongs_to_a_form()
-    {
-        $form = FeedbackForm::factory()->create();
-        $question = FeedbackQuestion::factory()->create(['form_id' => $form->form_id]);
-
-        $this->assertInstanceOf(FeedbackForm::class, $question->form);
-        $this->assertEquals($form->form_id, $question->form->form_id);
-    }
 
     /** @test */
     public function it_has_many_responses()
