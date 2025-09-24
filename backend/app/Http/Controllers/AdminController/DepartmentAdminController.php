@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+
 
 class DepartmentAdminController extends Controller
 {
@@ -156,21 +159,6 @@ public function getDepartmentData(Request $request)
 
 
 
-
-    /**
-     * Update employee or service
-     */
-
-  /**
- * PUT update employee
- */
-
-/**
- * PATCH update employee
- */
-
-
-/**
  * PATCH update service
  */
 public function putUpdateEmployeeService(Request $request, $employeeId)
@@ -251,6 +239,18 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
     ]);
 }
 
+// Generate QR code for employee feedback link
+ public function generateQr($employee_id)
+    {
+        $employee = Employee::findOrFail($employee_id);
+
+        $url = url("/feedback/EMP-{$employee->employee_id}");
+        
+        // Generate QR as SVG
+        $qrCode = QrCode::size(200)->generate($url);
+
+        return response($qrCode)->header('Content-Type', 'image/svg+xml');
+    }
 
 
 
