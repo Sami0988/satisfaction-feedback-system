@@ -75,3 +75,15 @@ export const searchDepartments = async (query, page = 1, perPage = 12) => {
     throw error;
   }
 };
+
+
+// get department with admin details
+export const getDepartmentWithAdmin = async (id) => {
+  try {
+    const response = await API.get(`/department/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching department with admin ${id}:`, error);
+    throw error;
+  }
+};

@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+
 
 class DepartmentAdminController extends Controller
 {
@@ -156,20 +159,6 @@ public function getDepartmentData(Request $request)
 
 
 
-
-    /**
-     * Update employee or service
-     */
-
-  /**
- * PUT update employee
- */
-
-/**
- * PATCH update employee
- */
-
-
 /**
  * PATCH update service
  */
@@ -251,6 +240,18 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
     ]);
 }
 
+// Generate QR code for employee feedback link
+ public function generateQr($employee_id)
+    {
+        $employee = Employee::findOrFail($employee_id);
+
+        $url = url("/feedback/EMP-{$employee->employee_id}");
+        
+        // Generate QR as SVG
+        $qrCode = QrCode::size(200)->generate($url);
+
+        return response($qrCode)->header('Content-Type', 'image/svg+xml');
+    }
 
 
 
@@ -286,4 +287,43 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
 
         return response()->json(['status' => 'error', 'message' => 'Invalid type'], 400);
     }
+
+  public function generateQrEmployee($employee_id)
+    {
+        $employee = Employee::findOrFail($employee_id);
+
+        // Use the frontend URL and append the employee ID
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:3001');
+        $qrContent = $frontendUrl . '/department/' . $employee->employee_id;
+
+        // Generate QR code as SVG
+        $qr = QrCode::size(200)->generate($qrContent);
+
+        return response($qr)->header('Content-Type', 'image/svg+xml');
+    }
+
+    /**
+     * Retrieve employee info
+     */
+    public function getEmployeeInfo($employee_id)
+    {
+        $employee = Employee::with(['role', 'department'])->findOrFail($employee_id);
+
+        $data = [
+            'id' => $employee->employee_id,
+            'name' => $employee->full_name,
+            'email' => $employee->email,
+            'department' => $employee->department ? $employee->department->name : null,
+            'role' => $employee->role ? $employee->role->name : null,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    
 }
+
+

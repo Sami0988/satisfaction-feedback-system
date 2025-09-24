@@ -1,6 +1,10 @@
-// admin-employee-frontend/src/redux/slices/AuthSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { login as loginApi, logout as logoutApi } from "../../api/AutApi";
+import {
+  login as loginApi,
+  logout as logoutApi,
+  forgotPassword as forgotPasswordApi,
+  resetPassword as resetPasswordApi,
+} from "../../api/AutApi";
 
 // Safe initial state
 const getInitialState = () => {
@@ -8,7 +12,6 @@ const getInitialState = () => {
   let parsedUser = null;
 
   try {
-    // Only parse if storedUser exists and is valid
     if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
       parsedUser = JSON.parse(storedUser);
     }
@@ -22,6 +25,7 @@ const getInitialState = () => {
     user: parsedUser || null,
     loading: false,
     error: null,
+    message: null, // For success messages like "reset link sent"
   };
 };
 
@@ -32,14 +36,15 @@ const authSlice = createSlice({
     loginStart: (state) => {
       state.loading = true;
       state.error = null;
+      state.message = null;
     },
     loginSuccess: (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.error = null;
+      state.message = null;
 
-      // Store only valid user and token
       if (action.payload.user && typeof action.payload.user === "object") {
         localStorage.setItem("user", JSON.stringify(action.payload.user));
       }
@@ -52,31 +57,59 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.error = action.payload;
+      state.message = null;
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
       state.error = null;
       state.loading = false;
+      state.message = null;
       localStorage.removeItem("user");
       localStorage.removeItem("token");
     },
     clearError: (state) => {
       state.error = null;
     },
+    clearMessage: (state) => {
+      state.message = null;
+    },
+    forgotPasswordStart: (state) => {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    forgotPasswordSuccess: (state, action) => {
+      state.loading = false;
+      state.message = action.payload;
+    },
+    forgotPasswordFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    resetPasswordStart: (state) => {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    resetPasswordSuccess: (state, action) => {
+      state.loading = false;
+      state.message = action.payload;
+    },
+    resetPasswordFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
-// Thunks (async actions)
+// Thunks
 export const loginUser = (username, password) => async (dispatch) => {
   dispatch(loginStart());
   try {
     const data = await loginApi(username, password);
-
-    // Only dispatch success if valid data
     if (data?.user && data?.token) {
       dispatch(loginSuccess(data));
-      console.log("Login API response:", data);
     } else {
       dispatch(loginFailure("Invalid login response from server"));
     }
@@ -96,7 +129,51 @@ export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
 };
 
-export const { loginStart, loginSuccess, loginFailure, logout, clearError } =
-  authSlice.actions;
+// ✅ Forgot password thunk
+export const forgotPassword = (email) => async (dispatch) => {
+  dispatch(forgotPasswordStart());
+  try {
+    const data = await forgotPasswordApi(email);
+    dispatch(forgotPasswordSuccess(data.message || "Reset link sent!"));
+  } catch (error) {
+    dispatch(
+      forgotPasswordFailure(
+        error.response?.data?.message || "Failed to send reset link"
+      )
+    );
+  }
+};
+
+// ✅ Reset password thunk
+export const resetPassword = (token, password) => async (dispatch) => {
+  dispatch(resetPasswordStart());
+  try {
+    const data = await resetPasswordApi(token, password);
+    dispatch(
+      resetPasswordSuccess(data.message || "Password reset successfully!")
+    );
+  } catch (error) {
+    dispatch(
+      resetPasswordFailure(
+        error.response?.data?.message || "Failed to reset password"
+      )
+    );
+  }
+};
+
+export const {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  logout,
+  clearError,
+  clearMessage,
+  forgotPasswordStart,
+  forgotPasswordSuccess,
+  forgotPasswordFailure,
+  resetPasswordStart,
+  resetPasswordSuccess,
+  resetPasswordFailure,
+} = authSlice.actions;
 
 export default authSlice.reducer;
