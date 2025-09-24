@@ -158,6 +158,7 @@ public function getDepartmentData(Request $request)
 }
 
 
+
 /**
  * PATCH update service
  */
@@ -252,17 +253,17 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
         return response($qrCode)->header('Content-Type', 'image/svg+xml');
     }
 
-     
 
 
 
-    
-    
+
+
+
      /**
      * Delete employee or service
      */
-   
-   
+
+
      public function destroy(Request $request, $type, $id)
     {
         $admin = $request->user();

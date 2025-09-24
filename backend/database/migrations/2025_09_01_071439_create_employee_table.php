@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('employees', function (Blueprint $table) {
             // UUID primary key
             $table->uuid('employee_id')->primary();
@@ -18,10 +19,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->string('password');
-            
+
+
             // Add the role_id column and foreign key constraint
             $table->uuid('role_id')->nullable();
-            
+
             // Foreign key constraints
             $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('set null');
             $table->foreignUuid('department_id')->nullable()->constrained('departments', 'department_id')->onDelete('set null');
@@ -29,12 +31,14 @@ return new class extends Migration
 
             $table->date('hire_date')->nullable();
             $table->boolean('active')->default(true);
+
             $table->timestamps();
 
             // Indexes for lookups
             $table->index('department_id');
             $table->index('service_id');
         });
+
     }
 
     /**
@@ -43,5 +47,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('employees');
-    }
+
+
+}
 };
