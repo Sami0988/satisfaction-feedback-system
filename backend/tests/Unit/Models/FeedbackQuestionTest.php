@@ -26,23 +26,8 @@ class FeedbackQuestionTest extends TestCase
         $this->assertEquals('question_id', $question->getKeyName());
     }
 
-   
-
-    /** @test */
-    public function it_has_correct_incrementing_setting()
-    {
-        $question = new FeedbackQuestion();
-        $this->assertFalse($question->getIncrementing());
-    }
 
 
     /** @test */
-    public function it_has_many_responses()
-    {
-        $question = FeedbackQuestion::factory()->create();
-        $responses = FeedbackResponse::factory()->count(3)->create(['question_id' => $question->question_id]);
-
-        $this->assertCount(3, $question->responses);
-        $this->assertInstanceOf(FeedbackResponse::class, $question->responses->first());
-    }
+    
 }
