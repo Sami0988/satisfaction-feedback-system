@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AddDepartmentController extends Controller
 {
@@ -272,6 +273,44 @@ public function destroy($id)
     ]);
 }
 
+// Generate QR code for department
+public function generateQr($department_id)
+{
+    $department = Department::findOrFail($department_id);
+
+    // Use the frontend URL and append the department ID directly
+    $frontendUrl = env('FRONTEND_URL', 'http://localhost:3001');
+    $qrContent = $frontendUrl . '/feedback/' . $department->department_id;
+
+    // Generate QR code as SVG
+    $qr = QrCode::size(200)->generate($qrContent);
+
+    return response($qr)->header('Content-Type', 'image/svg+xml');
+}
+
+    // Retrieve department info
+    public function getDepartmentInfo($department_id)
+    {
+        $department = Department::findOrFail($department_id);
+
+        $admin = Employee::where('department_id', $department_id)
+            ->whereHas('role', function ($query) {
+                $query->where('name', 'Department Admin');
+            })
+            ->with('role') // eager load role details
+            ->first();
+
+        // Merge department + admin info
+        $data = array_merge(
+            $department->toArray(),
+            ['admin' => $admin] // keep admin nested, or merge further if you want flat
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
 
 
 

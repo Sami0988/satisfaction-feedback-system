@@ -7,6 +7,7 @@ import PasswordSettings from "../../../components/PasswordSettings";
 import EmployeeManagement from "./EmployeeManagement";
 import ServiceManagement from "./ServiceManagement";
 import Reports from "./Reports";
+import Feedback from "../../../components/Feedback";
 
 const SuperAdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -298,6 +299,8 @@ const SuperAdminDashboard = () => {
         return <Reports />;
       case "settings":
         return <PasswordSettings />;
+      case "feedback":
+        return <Feedback />;
       default:
         return <Dashboard />;
     }
