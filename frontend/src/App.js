@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { DarkModeProvider, useDarkMode } from "./context/DarkModeContext";
 import Layout from "./components/Layout";
 import LoadingSpinner from "./utils/LoadingSpinner";
+import QRScanner from "./components/QRScanner";
+import FeedbackPage from "./pages/Feedback/FeedbackPage";
 
 // lazy imports
 const WelcomePage = lazy(() => import("./pages/Service_Selection/WelcomePage"));
@@ -33,6 +35,11 @@ function App() {
                 path="employee/:departmentId/:serviceId"
                 element={<EmployeePage />}
               />
+              <Route
+                path="/feedback/:departmentId"
+                element={<FeedbackPage />}
+              />
+              <Route path="/scan-qr" element={<QRScanner />} />
             </Routes>
           </Suspense>
         </Layout>

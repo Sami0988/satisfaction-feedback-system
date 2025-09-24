@@ -15,39 +15,33 @@ jobs:
         working-directory: ./frontend
 
     steps:
-      # Checkout the code
       - uses: actions/checkout@v4
 
-      # Setup Node.js with proper cache configuration
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: ./frontend/package-lock.json  # Fixed path
+          cache-dependency-path: ./frontend/package-lock.json
 
-      # Install dependencies
+      # Changed this line
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
-      # Lint step (optional)
       - name: Run Lint
         run: npm run lint --if-present
 
-      # Run Jest tests
       - name: Run Jest Tests
         run: npm test -- --watchAll=false --ci --coverage
 
-      # Build production bundle
       - name: Build
         run: npm run build
 
-      # Upload build artifact
       - name: Upload production-ready build
         uses: actions/upload-artifact@v4
         with:
           name: react-build
-          path: ./frontend/build  # Fixed path
+          path: ./frontend/build
 
   deploy:
     name: Build & Push Docker Image

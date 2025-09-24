@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\AuthController\ForgotPasswordController;
 use App\Http\Controllers\AuthController\PasswordController;
 use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Controllers\ServiceSelector\DepartmentController;
@@ -11,14 +12,6 @@ use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 use App\Http\Controllers\AdminController\DepartmentAdminController;
 
 
-
-
-
-
-use App\Http\Controllers\UserController;
-
-
-use App\Http\Controllers\Controller;
 // use App\Http\Controllers\AddDepartmentController;
 
 Route::get('/feedback-forms', [FeedbackFormController::class, 'index']);
@@ -60,7 +53,13 @@ Route::prefix('super-admin')->middleware('auth:sanctum')->group(function () {
     Route::delete('/departments/{id}', [AddDepartmentController::class, 'destroy']);
 });
 
+
+// password routes
 Route::middleware('auth:sanctum')->post('/password/update', [PasswordController::class, 'update']);
+
+
+Route::post('/forgot/password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset/password/{token}', [ForgotPasswordController::class, 'resetPassword']);
 
 
 // Admin routes for managing employees and services in their department
@@ -78,4 +77,18 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
     // Delete employee or service by type and id
     Route::delete('/employee-service/{id}', [DepartmentAdminController::class, 'destroy']);
+
 });
+
+
+// user routes for feedback submission and retrieval and qr code generation
+// QR code route
+Route::get('/department/{department_id}/qr', [AddDepartmentController::class, 'generateQr']);
+
+// Department info route
+Route::get('/department/{department_id}', [AddDepartmentController::class, 'getDepartmentInfo']);
+
+// Employee QR code generator
+    Route::get('/employees/{employee_id}/qr', [DepartmentAdminController::class, 'generateQrEmployee']);
+    // Get employee info
+    Route::get('/employees/{employee_id}/info', [DepartmentAdminController::class, 'getEmployeeInfo']);
