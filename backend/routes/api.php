@@ -12,7 +12,6 @@ use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 use App\Http\Controllers\AdminController\DepartmentAdminController;
 
 
-
 // use App\Http\Controllers\AddDepartmentController;
 
 Route::get('/feedback-forms', [FeedbackFormController::class, 'index']);
@@ -78,6 +77,7 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
     // Delete employee or service by type and id
     Route::delete('/employee-service/{id}', [DepartmentAdminController::class, 'destroy']);
+
 });
 
 
@@ -87,3 +87,8 @@ Route::get('/department/{department_id}/qr', [AddDepartmentController::class, 'g
 
 // Department info route
 Route::get('/department/{department_id}', [AddDepartmentController::class, 'getDepartmentInfo']);
+
+// Employee QR code generator
+    Route::get('/employees/{employee_id}/qr', [DepartmentAdminController::class, 'generateQrEmployee']);
+    // Get employee info
+    Route::get('/employees/{employee_id}/info', [DepartmentAdminController::class, 'getEmployeeInfo']);
