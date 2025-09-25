@@ -10,6 +10,8 @@ use App\Http\Controllers\ServiceSelector\EmployeeController;
 use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
 use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 use App\Http\Controllers\AdminController\DepartmentAdminController;
+use App\Http\Controllers\SuperAdminController\CreateQuestionController;
+use App\Http\Controllers\SuperAdminController\DashboardController;
 
 
 // use App\Http\Controllers\AddDepartmentController;
@@ -20,7 +22,7 @@ Route::get('/feedback-forms/{id}', [FeedbackFormController::class, 'show']);
 Route::put('/feedback-forms/{id}', [FeedbackFormController::class, 'update']);
 Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']);
 
-
+Route::get('/SuperAdmin-info', [DashboardController::class, 'show']);
 
 
 //Auth routes
@@ -33,7 +35,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::get('/departments/{department_id}/services', [ServiceController::class, 'index']);
 
 // frontend page department selection
-Route::apiResource('departments', DepartmentController::class)->only(['index', 'show']); 
+Route::apiResource('departments', DepartmentController::class)->only(['index', 'show']);
 
  // frontend page employees selection
 Route::apiResource('employees', EmployeeController::class);
@@ -92,3 +94,10 @@ Route::get('/department/{department_id}', [AddDepartmentController::class, 'getD
     Route::get('/employees/{employee_id}/qr', [DepartmentAdminController::class, 'generateQrEmployee']);
     // Get employee info
     Route::get('/employees/{employee_id}/info', [DepartmentAdminController::class, 'getEmployeeInfo']);
+
+
+
+
+    // Feedback routes
+    Route::post('/super-admin/feedback', [CreateQuestionController::class, 'store'])->middleware('auth:sanctum');
+
