@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\SuperdAdminController;
+namespace App\Http\Controllers\SuperAdminController;
 
 use App\Http\Controllers\Controller;
 use App\Models\FeedbackQuestion;
