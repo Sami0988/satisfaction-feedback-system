@@ -10,6 +10,7 @@ use App\Http\Controllers\ServiceSelector\EmployeeController;
 use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
 use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 use App\Http\Controllers\AdminController\DepartmentAdminController;
+use App\Http\Controllers\User\FeedbackController;
 
 
 // use App\Http\Controllers\AddDepartmentController;
@@ -92,3 +93,12 @@ Route::get('/department/{department_id}', [AddDepartmentController::class, 'getD
     Route::get('/employees/{employee_id}/qr', [DepartmentAdminController::class, 'generateQrEmployee']);
     // Get employee info
     Route::get('/employees/{employee_id}/info', [DepartmentAdminController::class, 'getEmployeeInfo']);
+
+    //get service by department id
+Route::get('/departments/{department_id}/services', [DepartmentAdminController::class, 'getByDepartment']);
+
+// Feedback routes
+Route::prefix('feedback-questions')->group(function () {
+    Route::get('/', [FeedbackController::class, 'index']); // Get all feedback questions
+    Route::get('/{id}', [FeedbackController::class, 'show']); // Get a single question
+});
