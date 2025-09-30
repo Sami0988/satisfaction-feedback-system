@@ -372,6 +372,24 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
     }
 
 
+// Get all services that belong to a specific department
+      public function getByDepartment($department_id)
+    {
+        $services = Service::where('department_id', $department_id)->get();
+
+        if ($services->isEmpty()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'No services found for this department'
+            ], 404);
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'data'    => $services
+        ]);
+    }
+
 }
 
 
