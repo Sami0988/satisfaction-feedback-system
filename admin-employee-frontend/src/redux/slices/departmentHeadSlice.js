@@ -1,11 +1,9 @@
 // admin-employee-frontend/src/redux/slices/departmentHeadSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  addEmployeeAndServiceApi,
+  addEmployeeApi,
+  addServiceApi,
   getDepartmentDataApi,
-  updateEmployeeAndServiceApi,
-  patchUpdateEmployeeAndServiceApi,
-  deleteEmployeeOrServiceApi,
 } from "../../api/DepartmentHead/departmentHeadApi";
 import { toast } from "react-toastify";
 
@@ -13,8 +11,8 @@ const initialState = {
   loading: false,
   success: false,
   error: null,
-  employees: [], // Ensure this is always an array
-  services: [], // Ensure this is always an array
+  employees: [],
+  services: [],
 };
 
 const departmentHeadSlice = createSlice({
@@ -36,72 +34,22 @@ const departmentHeadSlice = createSlice({
       state.success = false;
       state.error = action.payload;
     },
-    fetchStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
     fetchSuccess: (state, action) => {
       state.loading = false;
       state.error = null;
-
-      // Safely handle the API response structure
       const responseData = action.payload?.data || [];
-
-      // Ensure employees is always an array
       state.employees = Array.isArray(responseData) ? responseData : [];
-
-      // Extract services safely
       state.services = Array.isArray(responseData)
         ? responseData
-            .filter((emp) => emp.service !== null && emp.service !== undefined)
+            .filter((emp) => emp.service)
             .map((emp) => emp.service)
         : [];
     },
-    fetchFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-      state.employees = []; // Reset to empty array on error
-      state.services = []; // Reset to empty array on error
-    },
-    updateEmployeeInState: (state, action) => {
-      const updatedEmployee = action.payload;
-      state.employees = state.employees.map((emp) =>
-        emp.employee_id === updatedEmployee.employee_id ? updatedEmployee : emp
-      );
-
-      // Also update the service if it exists
-      if (updatedEmployee.service) {
-        state.services = state.services.map((srv) =>
-          srv.service_id === updatedEmployee.service.service_id
-            ? updatedEmployee.service
-            : srv
-        );
-      }
-    },
     addEmployeeToState: (state, action) => {
-      const newEmployee = action.payload;
-      state.employees = [...state.employees, newEmployee];
-
-      if (newEmployee.service) {
-        state.services = [...state.services, newEmployee.service];
-      }
+      state.employees.push(action.payload);
     },
-    removeEmployeeFromState: (state, action) => {
-      const employeeId = action.payload;
-      const employeeToRemove = state.employees.find(
-        (emp) => emp.employee_id === employeeId
-      );
-
-      state.employees = state.employees.filter(
-        (emp) => emp.employee_id !== employeeId
-      );
-
-      // Also remove the associated service if it exists
-      if (employeeToRemove && employeeToRemove.service) {
-        state.services = state.services.filter(
-          (srv) => srv.service_id !== employeeToRemove.service.service_id
-        );
-      }
+    addServiceToState: (state, action) => {
+      state.services.push(action.payload);
     },
     clearDepartmentHeadState: (state) => {
       state.loading = false;
@@ -117,111 +65,52 @@ export const {
   actionStart,
   actionSuccess,
   actionFailure,
-  fetchStart,
   fetchSuccess,
-  fetchFailure,
-  updateEmployeeInState,
   addEmployeeToState,
-  removeEmployeeFromState,
+  addServiceToState,
   clearDepartmentHeadState,
 } = departmentHeadSlice.actions;
 
 // Thunks
 
-// Add employee and/or service
-export const addEmployeeAndService = (data) => async (dispatch) => {
+// Add Employee
+export const addEmployee = (employeeData) => async (dispatch) => {
   dispatch(actionStart());
   try {
-    const res = await addEmployeeAndServiceApi(data);
+    const res = await addEmployeeApi(employeeData);
     dispatch(actionSuccess());
     dispatch(addEmployeeToState(res.data));
-    toast.success("Employee and/or service added successfully!");
-    return res.data;
+    toast.success("Employee added successfully!");
   } catch (error) {
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to add employee/service";
+    const message = error.response?.data?.message || error.message;
     dispatch(actionFailure(message));
     toast.error(message);
-    throw error;
   }
 };
 
-// Fetch employees and services
-export const fetchDepartmentData = () => async (dispatch) => {
-  dispatch(fetchStart());
+// Add Service
+export const addService = (serviceData) => async (dispatch) => {
+  dispatch(actionStart());
   try {
-    const res = await getDepartmentDataApi();
-    console.log("Department data fetched:", res.data);
-
-    // Pass the correct data structure to the reducer
-    dispatch(fetchSuccess(res.data));
+    const res = await addServiceApi(serviceData);
+    dispatch(actionSuccess());
+    dispatch(addServiceToState(res.data));
+    toast.success("Service added successfully!");
   } catch (error) {
-    const message =
-      error.response?.data?.message || error.message || "Failed to fetch data";
-    dispatch(fetchFailure(message));
+    const message = error.response?.data?.message || error.message;
+    dispatch(actionFailure(message));
     toast.error(message);
   }
 };
 
-// Full update (PUT)
-export const updateEmployeeAndService =
-  (employeeId, data) => async (dispatch) => {
-    dispatch(actionStart());
-    try {
-      const res = await updateEmployeeAndServiceApi(employeeId, data);
-      dispatch(updateEmployeeInState(res.data));
-      toast.success("Employee and linked service fully updated!");
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to update employee/service";
-      dispatch(actionFailure(message));
-      toast.error(message);
-    }
-  };
-
-// Partial update (PATCH)
-export const patchUpdateEmployeeAndService =
-  (employeeId, data) => async (dispatch) => {
-    dispatch(actionStart());
-    try {
-      const res = await patchUpdateEmployeeAndServiceApi(employeeId, data);
-      dispatch(updateEmployeeInState(res.data));
-      toast.success("Employee and linked service partially updated!");
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to partially update employee/service";
-      dispatch(actionFailure(message));
-      toast.error(message);
-    }
-  };
-
-// Delete employee or service
-export const deleteEmployeeOrService = (type, id) => async (dispatch) => {
+// Fetch Department Data
+export const fetchDepartmentData = () => async (dispatch) => {
   dispatch(actionStart());
   try {
-    await deleteEmployeeOrServiceApi(type, id);
-
-    if (type === "employee") {
-      dispatch(removeEmployeeFromState(id));
-    } else {
-      // For service deletion, refetch to ensure consistency
-      dispatch(fetchDepartmentData());
-    }
-
-    toast.success(
-      `${type === "employee" ? "Employee" : "Service"} deleted successfully!`
-    );
+    const res = await getDepartmentDataApi();
+    dispatch(fetchSuccess(res.data));
   } catch (error) {
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to delete employee/service";
+    const message = error.response?.data?.message || error.message;
     dispatch(actionFailure(message));
     toast.error(message);
   }

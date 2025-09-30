@@ -10,7 +10,6 @@ use App\Http\Controllers\ServiceSelector\EmployeeController;
 use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
 use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 use App\Http\Controllers\AdminController\DepartmentAdminController;
-
 use App\Http\Controllers\User\FeedbackController;
 
 use App\Http\Controllers\SuperAdminController\CreateQuestionController;
@@ -26,7 +25,7 @@ Route::get('/feedback-forms/{id}', [FeedbackFormController::class, 'show']);
 Route::put('/feedback-forms/{id}', [FeedbackFormController::class, 'update']);
 Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']);
 
-Route::get('/SuperAdmin-info', [DashboardController::class, 'show']);
+//Route::get('/SuperAdmin-info', [DashboardController::class, 'show']);
 
 
 //Auth routes
@@ -47,7 +46,7 @@ Route::apiResource('employees', EmployeeController::class);
 
 
 
-// Super Admin routes for creating and managing super admins
+// Super Admin routes foreating and managing superr c admins
  Route::post('/super-admin/create', [AddSuperAdminController::class, 'store']);
 
 // Super Admin routes
