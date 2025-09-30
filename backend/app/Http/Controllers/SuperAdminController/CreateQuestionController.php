@@ -23,22 +23,22 @@ class CreateQuestionController extends Controller
      * Store a newly created feedback question in storage.
      */
     public function store(Request $request)
-    {
-        // Validate the incoming request data
-        $request->validate([
-            'question_text' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'type' => 'required|string|in:scale,yes/no,open',
-        ]);
+{
+    // Validate the incoming request data
+    $validated = $request->validate([
+        'question_text' => 'required|string|max:255',
+        'category' => 'required|string|max:255',
+        'type' => 'required|string|in:scale,yes/no,open',
+    ]);
 
-        // Create a new FeedbackQuestion instance and save it to the database
-        FeedbackQuestion::create([
-            'question_text' => $request->input('question_text'),
-            'category' => $request->input('category'),
-            'type' => $request->input('type'),
-        ]);
+    // Create a new FeedbackQuestion instance and save it to the database
+    $feedbackQuestion = FeedbackQuestion::create($validated);
 
-        // Redirect back with a success message
-        return redirect()->back()->with('success', 'Question added successfully!');
-    }
+    // Return JSON response instead of redirect
+    return response()->json([
+        'success' => true,
+        'message' => 'Question added successfully!',
+        'data' => $feedbackQuestion
+    ], 201); // 201 = Created
+}
 }
