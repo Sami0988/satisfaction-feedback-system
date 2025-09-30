@@ -22,7 +22,10 @@ class CreateQuestionController extends Controller
     /**
      * Store a newly created feedback question in storage.
      */
-    public function store(Request $request)
+
+
+  public function store(Request $request)
+
 {
     // Validate the incoming request data
     $validated = $request->validate([
@@ -39,6 +42,10 @@ class CreateQuestionController extends Controller
         'success' => true,
         'message' => 'Question added successfully!',
         'data' => $feedbackQuestion
+
     ], 201);
+
+    ], 201); // 201 = Created
+
 }
 }
