@@ -39,6 +39,6 @@ class CreateQuestionController extends Controller
         'success' => true,
         'message' => 'Question added successfully!',
         'data' => $feedbackQuestion
-    ], 201); // 201 = Created
+    ], 201);
 }
 }
