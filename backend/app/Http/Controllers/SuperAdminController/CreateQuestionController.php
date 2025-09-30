@@ -13,7 +13,7 @@ class CreateQuestionController extends Controller
      */
     public function create()
     {
-        //return view('feedback.create');
+        //return view;
         return response()->json([
     'message' => "your feedback question creation page will be displayed."
 ]);
