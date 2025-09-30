@@ -1,74 +1,53 @@
 // components/services/ServicesManagement.js
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import ThemeContext from "../../../context/ThemeContext";
+import {
+  fetchDepartmentData,
+  addEmployeeAndService,
+} from "../../../redux/slices/departmentHeadSlice";
 
 const ServicesManagement = () => {
   const { isDarkMode } = useContext(ThemeContext);
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "Web Development",
-      category: "IT",
-      price: "$100",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Graphic Design",
-      category: "Design",
-      price: "$80",
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Content Writing",
-      category: "Marketing",
-      price: "$50",
-      status: "Inactive",
-    },
-    {
-      id: 4,
-      name: "SEO Optimization",
-      category: "Marketing",
-      price: "$120",
-      status: "Active",
-    },
-  ]);
+  const dispatch = useDispatch();
+
+  // Get services from Redux
+  const services = useSelector((state) => state.departmentHead.services || []);
+  const loading = useSelector((state) => state.departmentHead.loading);
 
   const [newService, setNewService] = useState({
     name: "",
     category: "",
-    price: "",
+    description: "",
   });
   const [isAdding, setIsAdding] = useState(false);
 
-  const handleAddService = () => {
-    if (newService.name && newService.category && newService.price) {
-      const service = {
-        id: services.length + 1,
-        name: newService.name,
-        category: newService.category,
-        price: newService.price,
-        status: "Active",
-      };
+  const categories = ["IT", "Design", "Marketing", "Support", "Consulting"];
 
-      setServices([...services, service]);
-      setNewService({ name: "", category: "", price: "" });
-      setIsAdding(false);
+  useEffect(() => {
+    // Fetch services from backend when component mounts
+    dispatch(fetchDepartmentData());
+  }, [dispatch]);
+
+  const handleAddService = async () => {
+    if (newService.name && newService.category && newService.description) {
+      try {
+        // We pass only the service object to the backend
+        await dispatch(
+          addEmployeeAndService({ service: newService })
+        ).unwrap();
+
+        setNewService({ name: "", category: "", description: "" });
+        setIsAdding(false);
+      } catch (error) {
+        console.error("Failed to add service:", error);
+      }
     }
   };
 
   const toggleServiceStatus = (id) => {
-    setServices(
-      services.map((service) =>
-        service.id === id
-          ? {
-              ...service,
-              status: service.status === "Active" ? "Inactive" : "Active",
-            }
-          : service
-      )
-    );
+    // You can implement this similarly if your backend supports status updates
+    // For now, we can keep it local
   };
 
   const getStatusBadgeClass = (status) => {
@@ -76,8 +55,6 @@ const ServicesManagement = () => {
       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
   };
-
-  const categories = ["IT", "Design", "Marketing", "Support", "Consulting"];
 
   return (
     <div
@@ -116,7 +93,9 @@ const ServicesManagement = () => {
                   : "bg-white border-gray-300"
               }`}
             />
-            <select
+            <input
+              type="text"
+              placeholder="Category"
               value={newService.category}
               onChange={(e) =>
                 setNewService({ ...newService, category: e.target.value })
@@ -126,20 +105,13 @@ const ServicesManagement = () => {
                   ? "bg-gray-600 border-gray-500 text-white"
                   : "bg-white border-gray-300"
               }`}
-            >
-              <option value="">Select Category</option>
-              {categories.map((category, index) => (
-                <option key={index} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            />
             <input
               type="text"
-              placeholder="Price"
-              value={newService.price}
+              placeholder="description"
+              value={newService.description}
               onChange={(e) =>
-                setNewService({ ...newService, price: e.target.value })
+                setNewService({ ...newService, description: e.target.value })
               }
               className={`p-2 rounded border ${
                 isDarkMode
@@ -165,146 +137,82 @@ const ServicesManagement = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
-            <tr>
-              <th
-                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                  isDarkMode
-                    ? "text-gray-300 bg-gray-700"
-                    : "text-gray-500 bg-gray-50"
-                }`}
-              >
-                Service Name
-              </th>
-              <th
-                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                  isDarkMode
-                    ? "text-gray-300 bg-gray-700"
-                    : "text-gray-500 bg-gray-50"
-                }`}
-              >
-                Category
-              </th>
-              <th
-                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                  isDarkMode
-                    ? "text-gray-300 bg-gray-700"
-                    : "text-gray-500 bg-gray-50"
-                }`}
-              >
-                Price
-              </th>
-              <th
-                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                  isDarkMode
-                    ? "text-gray-300 bg-gray-700"
-                    : "text-gray-500 bg-gray-50"
-                }`}
-              >
-                Status
-              </th>
-              <th
-                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                  isDarkMode
-                    ? "text-gray-300 bg-gray-700"
-                    : "text-gray-500 bg-gray-50"
-                }`}
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            className={`divide-y divide-gray-200 dark:divide-gray-700 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
-          >
-            {services.map((service) => (
-              <tr key={service.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className={`text-sm font-medium ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {service.name}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className={`text-sm ${
-                      isDarkMode ? "text-gray-300" : "text-gray-500"
-                    }`}
-                  >
-                    {service.category}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className={`text-sm ${
-                      isDarkMode ? "text-gray-300" : "text-gray-500"
-                    }`}
-                  >
-                    {service.price}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(
-                      service.status
-                    )}`}
-                  >
-                    {service.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    onClick={() => toggleServiceStatus(service.id)}
-                    className={`mr-2 ${
-                      service.status === "Active"
-                        ? "text-red-600 hover:text-red-900"
-                        : "text-green-600 hover:text-green-900"
-                    }`}
-                  >
-                    {service.status === "Active" ? "Deactivate" : "Activate"}
-                  </button>
-                  <button className="text-indigo-600 hover:text-indigo-900">
-                    Edit
-                  </button>
-                </td>
+      {loading ? (
+        <p>Loading services...</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                    isDarkMode
+                      ? "text-gray-300 bg-gray-700"
+                      : "text-gray-500 bg-gray-50"
+                  }`}
+                >
+                  Service Name
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                    isDarkMode
+                      ? "text-gray-300 bg-gray-700"
+                      : "text-gray-500 bg-gray-50"
+                  }`}
+                >
+                  Category
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                    isDarkMode
+                      ? "text-gray-300 bg-gray-700"
+                      : "text-gray-500 bg-gray-50"
+                  }`}
+                >
+                  discription
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                    isDarkMode
+                      ? "text-gray-300 bg-gray-700"
+                      : "text-gray-500 bg-gray-50"
+                  }`}
+                >
+                  Status
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-8">
-        <h3 className="text-lg font-medium mb-4">Service Categories</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {categories.map((category, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg text-center ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-100"
+            </thead>
+            <tbody
+              className={`divide-y divide-gray-200 dark:divide-gray-700 ${
+                isDarkMode ? "bg-gray-800" : "bg-white"
               }`}
             >
-              <span
-                className={`font-medium ${
-                  isDarkMode ? "text-white" : "text-gray-800"
-                }`}
-              >
-                {category}
-              </span>
-              <div className="mt-2 text-sm text-gray-500">
-                {services.filter((s) => s.category === category).length}{" "}
-                services
-              </div>
-            </div>
-          ))}
+              {services.map((service) => (
+                <tr key={service.service_id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {service.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {service.category}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {service.description}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(
+                        service.status
+                      )}`}
+                    >
+                      {service.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
     </div>
   );
 };
