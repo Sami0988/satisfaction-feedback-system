@@ -98,6 +98,54 @@ class DepartmentAdminController extends Controller
         ]);
     }
 
+     public function store(Request $request)
+    {
+        // 1. Get the department ID of the logged-in Admin
+        // This is still retrieved from the authenticated user.
+        $admin = $request->user();
+        $departmentId = $admin->department_id;
+
+        // 2. Validate the incoming data
+        $request->validate([
+            'name' => 'required|string|max:255|unique:services,name',
+            'category' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'active' => 'boolean',
+        ]);
+
+        // 3. Create the new Service record
+        try {
+            Service::create([
+                // Use Str::uuid() for string primary keys
+                'service_id' => (string) Str::uuid(),
+
+                // Assign the service to the admin's department
+                'department_id' => $departmentId,
+
+                'name' => $request->name,
+                'category' => $request->category,
+                'description' => $request->description,
+                'active' => $request->boolean('active', true), // Default to true if not provided
+            ]);
+
+           return response()->json([
+        'success' => true,
+        'message' => 'Service added successfully!',
+
+    ], 201);
+
+        } catch (\Exception $e) {
+            // Handle database or other errors
+            //return back()->withInput()->withErrors(['error' => 'Failed to create service: ' . $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create service: ' . $e->getMessage(),
+            ], 500);
+
+
+        }
+    }
+
 
 
     /**
@@ -246,7 +294,7 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
         $employee = Employee::findOrFail($employee_id);
 
         $url = url("/feedback/EMP-{$employee->employee_id}");
-        
+
         // Generate QR as SVG
         $qrCode = QrCode::size(200)->generate($url);
 
@@ -323,7 +371,7 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
         ]);
     }
 
-    
+
 // Get all services that belong to a specific department
       public function getByDepartment($department_id)
     {
@@ -341,6 +389,7 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
             'data'    => $services
         ]);
     }
+
 }
 
 
