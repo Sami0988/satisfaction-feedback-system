@@ -45,7 +45,7 @@ class CreateQuestionController extends Controller
 
     ], 201);
 
-    ], 201); // 201 = Created
+
 
 }
 }
