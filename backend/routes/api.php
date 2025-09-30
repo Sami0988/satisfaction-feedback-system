@@ -10,8 +10,11 @@ use App\Http\Controllers\ServiceSelector\EmployeeController;
 use App\Http\Controllers\SuperAdminController\AddSuperAdminController;
 use App\Http\Controllers\SuperAdminController\AddDepartmentController;
 use App\Http\Controllers\AdminController\DepartmentAdminController;
+use App\Http\Controllers\AdminController\AddServiceController;
+
 
 use App\Http\Controllers\User\FeedbackController;
+
 
 use App\Http\Controllers\SuperAdminController\CreateQuestionController;
 use App\Http\Controllers\SuperAdminController\DashboardController;
@@ -28,6 +31,7 @@ Route::delete('/feedback-forms/{id}', [FeedbackFormController::class, 'destroy']
 
 Route::get('/SuperAdmin-info', [DashboardController::class, 'show']);
 
+//department admin routes
 
 //Auth routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -73,6 +77,9 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
     // Add employee and/or service
     Route::post('/employee-service', [DepartmentAdminController::class, 'addEmployeeAndService']);
+
+
+Route::post('/add-services', [DepartmentAdminController::class, 'store']);
 
     // Get all employees and services in admin's department
     Route::get('/employee-service', [DepartmentAdminController::class, 'getDepartmentData']);
