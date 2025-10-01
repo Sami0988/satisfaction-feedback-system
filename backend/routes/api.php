@@ -76,7 +76,7 @@ Route::post('/reset/password/{token}', [ForgotPasswordController::class, 'resetP
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
     // Add employee and/or service
-    Route::post('/employee-service', [DepartmentAdminController::class, 'addEmployeeAndService']);
+    Route::post('/employee-registration', [DepartmentAdminController::class, 'Saveemp']);
 
 
 Route::post('/add-services', [DepartmentAdminController::class, 'store']);
