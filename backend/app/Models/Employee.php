@@ -38,22 +38,22 @@ class Employee extends Authenticatable
     ];
 
     // Auto-generate UUID on create
-    protected static function booted()
-    {
-        static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::creating(function ($model) {
+    //         if (empty($model->{$model->getKeyName()})) {
+    //             $model->{$model->getKeyName()} = (string) Str::uuid();
+    //         }
+    //     });
+    // }
 
-    // Relationship to department 
+    // Relationship to department
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
-    // Relationship to service 
+    // Relationship to service
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class, 'service_id', 'service_id');
