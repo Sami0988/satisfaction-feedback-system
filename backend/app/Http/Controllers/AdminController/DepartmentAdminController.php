@@ -140,10 +140,25 @@ class DepartmentAdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create service: ' . $e->getMessage(),
+                'departmetn_id' => $departmentId
             ], 500);
 
 
         }
+    }
+
+    //get all services
+     public function index(Request $request)
+    {
+        $admin = $request->user();
+        $departmentId = $admin->department_id;
+
+        $services = Service::where('department_id', $departmentId)->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $services
+        ]);
     }
 
 //adding new employee
@@ -166,6 +181,7 @@ class DepartmentAdminController extends Controller
     /**
      * Store a newly created employee in the database.
      */
+
     public function Saveemp(Request $request)
     {
         $admin = $request->user();
@@ -389,12 +405,6 @@ private function updateEmployeeService(Request $request, $employeeId, bool $isFu
 
         return response($qrCode)->header('Content-Type', 'image/svg+xml');
     }
-
-
-
-
-
-
 
      /**
      * Delete employee or service

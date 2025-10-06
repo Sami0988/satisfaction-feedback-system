@@ -4,8 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import ThemeContext from "../../../context/ThemeContext";
 import {
   fetchDepartmentData,
-  addEmployeeAndService,
+  addService,
 } from "../../../redux/slices/departmentHeadSlice";
+import { toast } from "react-toastify";
 
 const ServicesManagement = () => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -32,16 +33,17 @@ const ServicesManagement = () => {
   const handleAddService = async () => {
     if (newService.name && newService.category && newService.description) {
       try {
-        // We pass only the service object to the backend
-        await dispatch(
-          addEmployeeAndService({ service: newService })
-        ).unwrap();
+        // Pass raw object without 'service' wrapper
+        await dispatch(addService(newService));
 
         setNewService({ name: "", category: "", description: "" });
         setIsAdding(false);
       } catch (error) {
         console.error("Failed to add service:", error);
+        toast.error("Failed to add service");
       }
+    } else {
+      alert("Please fill in all fields");
     }
   };
 
