@@ -83,6 +83,9 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
 Route::post('/add-services', [DepartmentAdminController::class, 'store']);
 
+//get service
+Route::get('/get-services', [DepartmentAdminController::class, 'index']);
+
     // Get all employees and services in admin's department
     Route::get('/employee-service', [DepartmentAdminController::class, 'getDepartmentData']);
 

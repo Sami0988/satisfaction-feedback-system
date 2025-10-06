@@ -1,544 +1,505 @@
-import React, { useEffect, useContext, useState, useMemo } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState, useContext, useEffect } from "react";
 import ThemeContext from "../../../context/ThemeContext";
 import AddEmployee from "./AddEmployee";
-import EditEmployee from "./EditEmployee"; // Import the EditEmployee component
-import DeleteConfirmation from "../../../components/DeleteConfirmation";
+import EditEmployee from "./EditEmployee";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDepartmentData,
-  deleteEmployeeOrService,
-  updateEmployee, // Make sure to import this action
+  deleteEmployee,
 } from "../../../redux/slices/departmentHeadSlice";
 import { toast } from "react-toastify";
+import {
+  Search,
+  Plus,
+  Edit2,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Users,
+  Filter,
+} from "lucide-react";
 
 const EmployeeManagement = () => {
   const { isDarkMode } = useContext(ThemeContext);
   const dispatch = useDispatch();
+  const { employees, loading } = useSelector((state) => state.departmentHead);
 
-  const {
-    employees = [],
-    loading,
-    error,
-  } = useSelector((state) => state.departmentHead);
-
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // New state for edit modal
+  const [showAdd, setShowAdd] = useState(false);
+  const [editEmployee, setEditEmployee] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [itemsPerPage] = useState(8);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
-  // Delete confirmation modal state
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-
+  // Fetch employees on mount
   useEffect(() => {
     dispatch(fetchDepartmentData());
   }, [dispatch]);
 
-  const handleEditEmployee = (employee) => {
-    setEditingEmployee(employee);
-    setIsEditModalOpen(true); // Open the edit modal instead of the sheet
-  };
-
-  const handleEditSuccess = () => {
-    setIsEditModalOpen(false);
-    setEditingEmployee(null);
-    toast.success("Employee updated successfully!");
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await dispatch(
-        deleteEmployeeOrService("employee", deleteTarget.employee_id)
-      ).unwrap();
-      toast.success("Employee deleted successfully!");
-    } catch (error) {
-      toast.error("Failed to delete employee");
-    } finally {
-      setIsDeleteOpen(false);
-      setDeleteTarget(null);
-    }
-  };
-
-  const filteredEmployees = useMemo(() => {
-    if (!searchTerm) return employees;
-    return employees.filter(
-      (emp) =>
-        emp.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.phone?.includes(searchTerm) ||
-        emp.role_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.department_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.service?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.service?.category
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        emp.employee_id?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [employees, searchTerm]);
-
-  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedEmployees = filteredEmployees.slice(
-    startIndex,
-    startIndex + itemsPerPage
+  // Filter employees based on search term
+  const filteredEmployees = employees.filter(
+    (emp) =>
+      emp.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.role_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.department_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handlePageChange = (page) => setCurrentPage(page);
-  const handleItemsPerPageChange = (e) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
+  // Sort employees
+  const sortedEmployees = React.useMemo(() => {
+    if (!sortConfig.key) return filteredEmployees;
+
+    return [...filteredEmployees].sort((a, b) => {
+      const aValue = a[sortConfig.key] || "";
+      const bValue = b[sortConfig.key] || "";
+
+      if (aValue < bValue) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [filteredEmployees, sortConfig]);
+
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentEmployees = sortedEmployees.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(sortedEmployees.length / itemsPerPage);
+
+  const handleSort = (key) => {
+    setSortConfig({
+      key,
+      direction:
+        sortConfig.key === key && sortConfig.direction === "asc"
+          ? "desc"
+          : "asc",
+    });
   };
 
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      const startPage = Math.max(
-        1,
-        currentPage - Math.floor(maxVisiblePages / 2)
-      );
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-      if (startPage > 1) {
-        pages.push(1);
-        if (startPage > 2) pages.push("...");
-      }
-
-      for (let i = startPage; i <= endPage; i++) pages.push(i);
-
-      if (endPage < totalPages) {
-        if (endPage < totalPages - 1) pages.push("...");
-        pages.push(totalPages);
-      }
+  const handleDelete = (id, name) => {
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+      dispatch(deleteEmployee(id));
+      toast.success("Employee deleted successfully");
     }
-
-    return pages;
   };
 
-  const hasEmployees = Array.isArray(employees) && employees.length > 0;
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
-  if (loading) {
-    return (
-      <div
-        className={`rounded-lg shadow ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        } p-6`}
-      >
-        <div className="flex justify-center items-center h-40">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <span className="ml-3">Loading employees...</span>
-        </div>
-      </div>
-    );
-  }
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
-  if (error) {
-    return (
-      <div
-        className={`rounded-lg shadow ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        } p-6`}
-      >
-        <div className="text-center text-red-500 py-8">
-          Error loading employees: {error}
-        </div>
-      </div>
-    );
-  }
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return "↕️";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
+  };
 
   return (
     <div
-      className={`rounded-lg shadow ${
-        isDarkMode ? "bg-gray-800" : "bg-white"
-      } p-6`}
+      className={`min-h-screen transition-colors duration-200 ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+      }`}
     >
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold">Employee Management</h2>
-        <button
-          onClick={() => {
-            setEditingEmployee(null);
-            setIsSheetOpen(true);
-          }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center"
-        >
-          <span className="mr-2">+</span> Add Employee
-        </button>
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-2 rounded-lg ${
+                isDarkMode ? "bg-blue-900/20" : "bg-blue-100"
+              }`}
+            >
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Employee Management
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Manage your team members and their details
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <Plus className="w-5 h-5" />
+            Add Employee
+          </button>
+        </div>
       </div>
 
-      {/* Search & Items per page */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="w-full sm:w-64">
-          <input
-            type="text"
-            placeholder="Search employees..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-              isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-            }`}
-          />
-        </div>
+      {/* Controls */}
+      <div className="p-6">
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          {/* Search Bar */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search employees by name, email, role, or department..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl border transition-all duration-200 ${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  : "bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              }`}
+            />
+          </div>
 
-        <div className="flex items-center gap-4">
-          <label
-            className={`mr-2 text-sm ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
-          >
-            Show:
-          </label>
-          <select
-            value={itemsPerPage}
-            onChange={handleItemsPerPageChange}
-            className={`px-2 py-1 border rounded focus:ring-2 focus:ring-indigo-500 ${
+          {/* Results Count */}
+          <div
+            className={`px-4 py-3 rounded-xl border ${
               isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
+                ? "bg-gray-800 border-gray-700"
                 : "bg-white border-gray-300"
             }`}
           >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Add Employee Sheet */}
-      {isSheetOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50"
-            onClick={() => {
-              setIsSheetOpen(false);
-              setEditingEmployee(null);
-            }}
-          ></div>
-
-          <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 shadow-xl p-8 overflow-y-auto rounded-lg transform transition-transform duration-300 ease-in-out">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-semibold">
-                {editingEmployee ? "Edit Employee" : "Add New Employee"}
-              </h3>
-              <button
-                onClick={() => {
-                  setIsSheetOpen(false);
-                  setEditingEmployee(null);
-                }}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-
-            <AddEmployee
-              onSuccess={() => {
-                setIsSheetOpen(false);
-                setEditingEmployee(null);
-              }}
-              editingEmployee={editingEmployee}
-            />
+            <span className="text-sm font-medium">
+              {filteredEmployees.length} employee
+              {filteredEmployees.length !== 1 ? "s" : ""} found
+            </span>
           </div>
         </div>
-      )}
 
-      {/* Edit Employee Modal */}
-      {isEditModalOpen && (
-        <EditEmployee
-          employee={editingEmployee}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setEditingEmployee(null);
-          }}
-          onSuccess={handleEditSuccess}
-        />
-      )}
-
-      {/* Employee Table */}
-      <div className="overflow-x-auto">
-        {!hasEmployees ? (
-          <div className="text-center py-8 text-gray-500">
-            No employees found. Add your first employee to get started.
-          </div>
-        ) : filteredEmployees.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No employees match your search criteria.
-          </div>
-        ) : (
-          <>
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead>
+        {/* Employee Table */}
+        <div
+          className={`rounded-2xl shadow-lg overflow-hidden border transition-all duration-200 ${
+            isDarkMode
+              ? "bg-gray-800 border-gray-700"
+              : "bg-white border-gray-200"
+          }`}
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className={isDarkMode ? "bg-gray-700/50" : "bg-gray-50"}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Employee
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Role & Department
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Service
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Actions
-                  </th>
+                  {[
+                    { key: "full_name", label: "Full Name" },
+                    { key: "email", label: "Email" },
+                    { key: "phone", label: "Phone" },
+                    { key: "role_name", label: "Role" },
+                    { key: "department_name", label: "Department" },
+                    { key: "actions", label: "Actions" },
+                  ].map(({ key, label }) => (
+                    <th
+                      key={key}
+                      className={`px-6 py-4 text-left text-xs font-semibold uppercase cursor-pointer transition-colors ${
+                        key !== "actions"
+                          ? "hover:bg-gray-200 dark:hover:bg-gray-600"
+                          : ""
+                      } ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                      onClick={() => key !== "actions" && handleSort(key)}
+                    >
+                      <div className="flex items-center gap-1">
+                        {label}
+                        {key !== "actions" && (
+                          <span className="text-xs">{getSortIcon(key)}</span>
+                        )}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {paginatedEmployees.map((emp) => (
-                  <tr
-                    key={emp.employee_id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    {/* Employee Info */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              emp.full_name || ""
-                            )}&background=random`}
-                            alt={emp.full_name || "Employee"}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div
-                            className={`text-sm font-medium ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {emp.full_name || "Unknown"}
-                          </div>
-                          <div
-                            className={`text-xs ${
-                              isDarkMode ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            ID: {emp.employee_id || "N/A"}
-                          </div>
-                        </div>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="flex justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                       </div>
-                    </td>
-
-                    {/* Contact Info */}
-                    <td className="px-6 py-4">
-                      <div
-                        className={`text-sm ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        <div className="font-medium">
-                          {emp.email || "No email"}
-                        </div>
-                        <div>{emp.phone || "No phone"}</div>
-                      </div>
-                    </td>
-
-                    {/* Role & Department */}
-                    <td className="px-6 py-4">
-                      <div
-                        className={`text-sm ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-1 dark:bg-blue-900 dark:text-blue-200">
-                          {emp.role_name || "No role"}
-                        </span>
-                        <div className="mt-1 text-xs">
-                          {emp.department_name || "No department"}
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Service Info */}
-                    <td className="px-6 py-4">
-                      {emp.service ? (
-                        <div>
-                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mb-1 dark:bg-green-900 dark:text-green-200">
-                            {emp.service.name || "Unnamed service"}
-                          </span>
-                          <div
-                            className={`text-xs ${
-                              isDarkMode ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            {emp.service.category || "No category"}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300">
-                          No Service Assigned
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          emp.active
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                        }`}
-                      >
-                        {emp.active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleEditEmployee(emp)}
-                          className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                          title="Edit Employee"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeleteTarget(emp);
-                            setIsDeleteOpen(true);
-                          }}
-                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                          title="Delete Employee"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+                      <p className="mt-2 text-gray-500">Loading employees...</p>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between mt-6 px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 sm:px-6">
-                <div
-                  className={`text-sm ${
-                    isDarkMode ? "text-gray-400" : "text-gray-700"
-                  } mb-4 sm:mb-0`}
-                >
-                  Showing {startIndex + 1} to{" "}
-                  {Math.min(
-                    startIndex + itemsPerPage,
-                    filteredEmployees.length
-                  )}{" "}
-                  of {filteredEmployees.length} results
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`px-3 py-1 rounded-md text-sm font-medium ${
-                      currentPage === 1
-                        ? "text-gray-400 cursor-not-allowed"
-                        : "text-indigo-600 hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-indigo-900"
-                    }`}
-                  >
-                    Previous
-                  </button>
-
-                  {getPageNumbers().map((page, index) => (
-                    <button
-                      key={index}
-                      onClick={() =>
-                        typeof page === "number" ? handlePageChange(page) : null
-                      }
-                      disabled={page === "..."}
-                      className={`px-3 py-1 rounded-md text-sm font-medium ${
-                        page === currentPage
-                          ? "bg-indigo-600 text-white"
-                          : page === "..."
-                          ? "text-gray-500 cursor-default"
-                          : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                ) : currentEmployees.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 text-lg font-medium">
+                        No employees found
+                      </p>
+                      <p className="text-gray-400 mt-2">
+                        {searchTerm
+                          ? "Try adjusting your search terms"
+                          : "Get started by adding your first employee"}
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  currentEmployees.map((emp) => (
+                    <tr
+                      key={emp.employee_id}
+                      className={`transition-colors hover:scale-[0.99] ${
+                        isDarkMode ? "hover:bg-gray-700/50" : "hover:bg-gray-50"
                       }`}
                     >
-                      {page}
-                    </button>
-                  ))}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                              isDarkMode
+                                ? "bg-blue-900/20 text-blue-300"
+                                : "bg-blue-100 text-blue-600"
+                            }`}
+                          >
+                            {emp.full_name?.charAt(0) || "U"}
+                          </div>
+                          <span className="font-medium">{emp.full_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={emp.email ? "" : "text-gray-400"}>
+                          {emp.email || "Not provided"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={emp.phone ? "" : "text-gray-400"}>
+                          {emp.phone || "Not provided"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            emp.role_name === "manager"
+                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300"
+                              : "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                          }`}
+                        >
+                          {emp.role_name || "staff"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={emp.department_name ? "" : "text-gray-400"}
+                        >
+                          {emp.department_name || "Not assigned"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setEditEmployee(emp)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                            title="Edit employee"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDelete(emp.employee_id, emp.full_name)
+                            }
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title="Delete employee"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
+          {/* Pagination */}
+          {currentEmployees.length > 0 && (
+            <div
+              className={`px-6 py-4 border-t ${
+                isDarkMode
+                  ? "border-gray-700 bg-gray-800/50"
+                  : "border-gray-200 bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  Showing {indexOfFirstItem + 1} to{" "}
+                  {Math.min(indexOfLastItem, sortedEmployees.length)} of{" "}
+                  {sortedEmployees.length} entries
+                </div>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`px-3 py-1 rounded-md text-sm font-medium ${
-                      currentPage === totalPages
+                    onClick={prevPage}
+                    disabled={currentPage === 1}
+                    className={`p-2 rounded-lg transition-all ${
+                      currentPage === 1
                         ? "text-gray-400 cursor-not-allowed"
-                        : "text-indigo-600 hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-indigo-900"
+                        : "text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
                     }`}
                   >
-                    Next
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-lg transition-all ${
+                          currentPage === page
+                            ? "bg-blue-600 text-white shadow-lg"
+                            : "text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                    className={`p-2 rounded-lg transition-all ${
+                      currentPage === totalPages
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-            )}
-          </>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {hasEmployees && filteredEmployees.length > 0 && (
-        <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-          Showing {paginatedEmployees.length} of {filteredEmployees.length}{" "}
-          filtered employees
-          {searchTerm && ` for "${searchTerm}"`}
+      {/* Enhanced Add Employee Sheet */}
+      {showAdd && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowAdd(false)}
+          />
+
+          {/* Sheet */}
+          <div className="fixed inset-0 flex justify-center items-center z-50">
+            {/* Background overlay */}
+            <div
+              className="absolute inset-0 bg-black bg-opacity-50"
+              onClick={() => setShowAdd(false)}
+            ></div>
+
+            {/* Centered Sheet */}
+            <div
+              className={`relative w-full max-w-3xl h-full md:h-auto transform transition-transform duration-300 ${
+                isDarkMode ? "bg-gray-900" : "bg-white"
+              } shadow-2xl rounded-lg`}
+            >
+              {/* Header */}
+              <div
+                className={`flex items-center justify-between p-6 border-b ${
+                  isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+              >
+                <div>
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Add New Employee
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Fill in the employee details
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAdd(false)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    isDarkMode
+                      ? "hover:bg-gray-800 text-gray-400 hover:text-white"
+                      : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 max-h-[80vh] overflow-y-auto">
+                <AddEmployee
+                  onClose={() => setShowAdd(false)}
+                  onSuccess={() => {
+                    setShowAdd(false);
+                    toast.success("Employee added successfully!");
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmation
-        isOpen={isDeleteOpen}
-        onClose={() => {
-          setIsDeleteOpen(false);
-          setDeleteTarget(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        admin={deleteTarget?.full_name || "this employee"}
-      />
+      {/* Enhanced Edit Employee Sheet */}
+      {editEmployee && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setEditEmployee(null)}
+          />
+
+          {/* Sheet */}
+          <div className="absolute right-0 top-0 h-full w-full max-w-md">
+            <div
+              className={`h-full transform transition-transform duration-300 ${
+                isDarkMode ? "bg-gray-900" : "bg-white"
+              } shadow-2xl`}
+            >
+              {/* Header */}
+              <div
+                className={`flex items-center justify-between p-6 border-b ${
+                  isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+              >
+                <div>
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Edit Employee
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Update employee details
+                  </p>
+                </div>
+                <button
+                  onClick={() => setEditEmployee(null)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    isDarkMode
+                      ? "hover:bg-gray-800 text-gray-400 hover:text-white"
+                      : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="h-[calc(100%-80px)] overflow-y-auto">
+                <EditEmployee
+                  employee={editEmployee}
+                  onClose={() => setEditEmployee(null)}
+                  onSuccess={() => {
+                    setEditEmployee(null);
+                    toast.success("Employee updated successfully!");
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
